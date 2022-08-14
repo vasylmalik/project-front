@@ -1,11 +1,102 @@
 <html>
+
 <head>
     <title>RPG</title>
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <link href="/css/my.css" rel="stylesheet">
 </head>
-<body>
+<body onload="players_list(0)">
 <h1>RPG admin panel</h1>
+<h2>Accounts list:</h2>
 
+<label for="count_list">Count per page:</label>
+<select id="count_list" onchange="players_list(0)">
+    <option value="3">3</option>
+    <option value="5">5</option>
+    <option value="10">10</option>
+    <option value="20">20</option>
+</select>
+
+<table id="table_1">
+    <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Title</th>
+        <th>Race</th>
+        <th>Profession</th>
+        <th>Level</th>
+        <th>Birthday</th>
+        <th>Banned</th>
+    </tr>
+</table>
+
+<div id="paging_buttons">Pages:</div>
+
+<script>
+    function players_list(page_number) {
+        $("tr:has(td)").remove();
+
+        let url = "/rest/players?";
+
+        let countPerPage = $("#count_list").val();
+        if (countPerPage == null){
+            countPerPage = 3;
+        }
+
+        url = url.concat("pageSize=").concat(countPerPage);
+
+        if (page_number == null){
+            page_number = 0;
+        }
+
+        url = url.concat("&pageNumber=").concat(page_number);
+
+        $.get(url,function (response) {
+            $.each(response,function (key,value) {
+                $("<tr>").html("<td>"
+                    + value.id + "</td><td>"
+                    + value.name + "</td><td>"
+                    + value.title + "</td><td>"
+                    + value.race + "</td><td>"
+                    + value.profession + "</td><td>"
+                    + value.level + "</td><td>"
+                    + new Date(value.birthday).toLocaleDateString() + "</td><td>"
+                    + value.banned + "</td>"
+                ).appendTo("#table_1");
+            })
+        })
+
+        let totalCount = getTotalCount();
+
+        let pagesCount = Math.ceil(totalCount/countPerPage);
+
+        $("button.pgn-btn-style").remove();
+
+        for (let i = 0; i < pagesCount; i++) {
+            let button_tag = "<button>" + (i + 1) + "</button>";
+            let btn = $(button_tag)
+                .attr('id',"paging_button_" + i)
+                .attr('onclick',"players_list(" + i + ")")
+                .addClass('pgn-btn-style');
+            $('#paging_buttons').append(btn);
+        }
+
+        let identifier = "#paging_button_" + page_number;
+        $(identifier).css('color','red');
+    }
+    function getTotalCount(){
+        let url = "/rest/players/count";
+        let res = 0;
+        $.ajax({
+            url: url,
+            async: false,
+            success: function (result) {
+                res = parseInt(result);
+            }
+        })
+        console.log(res)
+        return res;
+    }
+</script>
 </body>
 </html>
