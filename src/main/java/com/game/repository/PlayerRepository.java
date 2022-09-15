@@ -58,11 +58,12 @@ public class PlayerRepository {
     }};
 
     public List<Player> getAll(int pageNumber, int pageSize) {
-        return storage.stream()
+        List<Player>playerList = storage.stream()
                 .sorted(Comparator.comparingLong(Player::getId))
                 .skip((long) pageNumber * pageSize)
                 .limit(pageSize)
                 .collect(Collectors.toList());
+        return playerList;
 
     }
 

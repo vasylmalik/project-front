@@ -4,8 +4,179 @@
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <link href="/css/my.css" rel="stylesheet">
 </head>
-<body>
+<body onload="show_list(0)">
 <h1>RPG admin panel</h1>
+
+<label for="counter">Count per page</label>
+<select id="counter" onchange="show_list(0)">
+    <option value="3">3</option>
+    <option value="5">5</option>
+    <option value="10">10</option>
+    <option value="20">20</option>
+</select>
+
+
+<table id="table_players">
+    <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Title</th>
+        <th>Race</th>
+        <th>Profession</th>
+        <th>Birthday</th>
+        <th>Banned</th>
+        <th>Level</th>
+        <th>Edit</th>
+        <th>Delete</th>
+    </tr>
+</table>
+<div id="paging_buttons">
+    Pages:
+</div>
+<h1 id="h_1">TeXt</h1>
+
+<script>
+    function show_list(page_number) {
+        $("tr:has(td)").remove();
+        let url = "/rest/players?";
+        let countPerPage = $('#counter').val();
+
+        if (countPerPage == null) {
+            countPerPage = 3;
+        }
+        url = url.concat("pageSize=").concat(countPerPage);
+
+        if (page_number == null) {
+            page_number = 0;
+        }
+        url = url.concat("&pageNumber=").concat(page_number);
+
+
+        $.get(url, function (response) {
+            $.each(response, function (i, item) {
+                const row = $('<tr>').html("<td>"
+                    + item.id + "</td><td id='name" + item.id + "'>"
+                    + item.name + "</td><td id='title" + item.id + "'>"
+                    + item.title + "</td><td>"
+                    + item.race + "</td><td>"
+                    + item.profession + "</td><td>"
+                    + new Date(item.birthday).toLocaleDateString() + "</td><td>"
+                    + item.banned + "</td><td>"
+                    + item.Level + "</td><td>"
+                    + "<button id = 'button_edit_" + item.id + "' onclick='edit_account(" + item.id + "," + page_number + ")'>"
+                    + "<img src='/img/edit.png'>"
+                    + "</button>" + "</td><td>"
+                    + "<button id = 'button_delete_" + item.id + "' onclick='delete_account(" + item.id + "," + page_number + ")'>"
+                    + "<img src='/img/delete.png'>"
+                    + "</button>" + "</td>");
+                $("#table_players").append(row);
+            });
+        });
+
+        let totalCount = getTotalCount();
+
+        let pagesCount = Math.ceil(totalCount / countPerPage);
+        $("button.png-btn-styled").remove();
+        $("button.click_active").remove();
+        for (let i = 0; i < pagesCount; i++) {
+            let button_tag = "<button>" + (i + 1) + "</button>";
+            let btn = $(button_tag)
+                .attr('id', "paging_button_" + i)
+                .attr('onclick', "show_list(" + i + ")")
+                .addClass('png-btn-styled');
+            $('#paging_buttons').append(btn);
+        }
+
+        let identifier = "#paging_button_" + page_number;
+        $(identifier)
+            .attr('class', "click_active")
+        /* $(identifier).css("color","red");*/
+    }
+
+    function getTotalCount() {
+        let url = "/rest/players/count";
+        let res = 0;
+        $.ajax({
+            url: url,
+            async: false,
+            success: function (result) {
+                res = parseInt(result);
+            }
+        })
+        console.log(res);
+        return res;
+    }
+
+    function delete_account(id, pageNumber) {
+        let url = "/rest/players/" + id;
+        $.ajax({
+            url: url,
+            type: 'DELETE',
+            success: function () {
+                show_list(pageNumber);
+            }
+        });
+    }
+
+    function edit_account(id, pageNumber) {
+        // let url = "/rest/edit/" + id;
+        let identifier_edit = '#button_edit_' + id;
+        let identifier_delete = '#button_delete_' + id;
+        $(identifier_delete).remove();
+        let save_image_tag = "<img src ='/img/save.png'>";
+        $(identifier_edit).html(save_image_tag);
+
+        let td_name = document.getElementById("name" + id);
+        td_name.innerHTML = "<input type='text' id='input_name_" + id + "' value='" + td_name.innerHTML + "'>";
+
+        let td_title = document.getElementById("title" + id);
+        td_title.innerHTML = "<input type='text' id='input_title" + id + "' value='" + td_title.innerHTML + "'>"
+
+        let current_tr_element = $(identifier_edit).parent().parent();
+        let children = current_tr_element.children();
+        let td_race = children[3];
+        getDropdownListRace(td_race, id)
+        let td_profession = children[4];
+        getDropdownListProfession(td_profession, id)
+        let td_banned = children[6];
+        getDropdownListBanned(td_banned,id)
+        // console.log(td_name);
+
+    }
+
+    function getDropdownListRace(element, id) {
+        element.innerHTML = "<select id = 'raceSelect" + id + "'>" +
+            "<option value='HUMAN'>HUMAN</option>" +
+            "<option value='DWARF'>DWARF</option>" +
+            "<option selected value='ELF'>ELF</option>" +
+            "<option value='GIANT'>GIANT</option>" +
+            "<option value='ORC'>ORC</option>" +
+            "<option value='TROLL'>TROLL</option>" +
+            "<option value='HOBBIT'>HOBBIT</option>" +
+            "</select>";
+    }
+
+    function getDropdownListProfession(element, id) {
+        element.innerHTML = "<select id='professionSelect" + id + "'>" +
+            "<option value='WARRIOR'>WARRIOR</option>" +
+            "<option selected value='ROGUE'>ROGUE</option>" +
+            "<option value='SORCERER'>SORCERER</option>" +
+            "<option value='CLERIC'>CLERIC</option>" +
+            "<option value='PALADIN'>PALADIN</option>" +
+            "<option value='WARLOCK'>WARLOCK</option>" +
+            "<option value='DRUID'>DRUID</option>" +
+            "</select>";
+    }
+
+    function getDropdownListBanned(element, id) {
+        element.innerHTML = "<select id='bannedSelect" + id + "'>" +
+            "<option selected value='false'>false</option>" +
+            "<option value='true'>true</option>" +
+            "</select>";
+    }
+
+
+</script>
 
 </body>
 </html>
