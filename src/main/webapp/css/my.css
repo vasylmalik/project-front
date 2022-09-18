@@ -8,14 +8,35 @@ th, td {
     color: red;
 }
 
+#table_players {
+    width: 95%;
+    margin-bottom: 20px;
+    border: 1px solid #dddddd;
+    border-collapse: collapse;
+}
+#table_players th {
+    font-weight: bold;
+    padding: 5px;
+    background: #deb887;
+    border: 2px solid #8b0000;
+}
+#table_players td {
+    border: 2px solid #555555;
+    padding: 5px;
+}
+#table_players tbody tr:nth-child(odd){
+    background: #a9a9a9;
+}
+#table_players tr:nth-child(even){
+    background: #dddddd;
+}
+
 /*label*/
 .label_create{
     display: inline-block;
     user-select: none;
     background-color: #555;
     color: white;
-    /*background-color: #FFFFFF;
-    border: 1px solid #e0e0e0;*/
     border: 1px solid black;
     padding: 3px;
     font-size: 16px;
@@ -39,31 +60,6 @@ th, td {
     font-style: italic;
 }
 
-
-
-/*select{
-    width: auto;
-}
-
-
-input[type="date"]{
-    width: auto;
-}*/
-
-/*.label_create{
-    background-color: #555;
-    color: white;
-    opacity: 0.8;
-    height: 300px;
-}*/
-
-/*.about-dialog{
-    background-color: #555;
-    color: white;
-    opacity: 0.8;
-    width: max-content;
-
-}*/
 
 
 
