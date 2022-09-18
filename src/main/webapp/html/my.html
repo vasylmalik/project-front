@@ -3,8 +3,16 @@
     <title>RPG</title>
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <link href="/css/my.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha512-Dop/vW3iOtayerlYAqCgkVr2aTr2ErwwTYOvRFUpzl2VhCMJyjQF0Q9TjUXIo6JhuM/3i0vVEt2e/7QQmnHQqw==" crossorigin="anonymous">
+    <!-- Дополнительные стили Bootstrap (не обязательно) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha512-iy8EXLW01a00b26BaqJWaCmk9fJ4PsMdgNRqV96KwMPSH+blO82OHzisF/zQbRIIi8m0PiO10dpS0QxrcXsisw==" crossorigin="anonymous">
+    <!-- jQuery (необходим для Bootstrap JS) -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <!-- Bootstrap JS -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha512-oBTprMeNEKCnqfuqKd6sbvFzmFQtlXS3e0C/RGFV0hD6QzhHV+ODfaQbAlmY6/q0ubbwlAM/nCJjkrgA3waLzg==" crossorigin="anonymous"></script>
 </head>
-<body onload="show_list(0)">
+
+<body class="html_body" onload="show_list(0)">
 <h1>RPG admin panel</h1>
 
 <label for="counter" class='label_create'>Count per page</label>
@@ -95,7 +103,16 @@
 <span>
     <button type="submit" class='create-button' onclick="creat_account()">Save</button>
 </span>
+<br>
 
+<button type="button" class="btn btn-primary" data-toggle="popover" title="Message" data-content="Bootstrap 4 work">Bring cursor here</button>
+
+<!-- После подключения jQuery, Popper и Bootstrap JS -->
+<script>
+    $(function () {
+        $('[data-toggle="popover"]').popover({trigger:'hover'});
+    });
+</script>
 
 <script>
     function show_list(page_number) {
