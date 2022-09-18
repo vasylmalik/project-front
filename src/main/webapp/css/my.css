@@ -7,3 +7,47 @@ th, td {
     color: red;
 }
 
+img {
+    cursor: pointer;
+}
+
+
+.align-left{
+    text-align: left;
+}
+
+
+.align-right{
+    text-align: right;
+}
+
+
+select{
+    width: auto;
+}
+
+
+input[type="date"]{
+    width: auto;
+}
+
+.label_create{
+    width: 300px;
+}
+
+.about-dialog{
+    background-color: #555;
+    color: white;
+    opacity: 0.8;
+    width: max-content;
+
+}
+
+.create-button {
+    background-color: #555;
+    color: white;
+    opacity: 0.8;
+}
+
+
+
