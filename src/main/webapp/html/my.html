@@ -37,14 +37,14 @@
 <h2 id="h_1">Create new account</h2>
 <br>
 
-<label for='input_name_new' class="label_create">Name</label>
+<label for='input_name_new' class='label_create'>Name</label>
 <input type='text' id='input_name_new' name='name' required size="15" maxlength="12">
 <br>
-<label for='input_title_new' class="label_create">Title</label>
+<label for='input_title_new' class='label_create'>Title</label>
 <input type='text' id='input_title_new' name='title' required size="30" maxlength="30">
 <br>
-<label for='input_race_new' class="label_create">Race</label>
-<select id='input_race_new' class="label_create"> +
+<label for='input_race_new' class='label_create'>Race</label>
+<select id='input_race_new'> +
     <option selected value='HUMAN'>HUMAN</option>
     +
     <option value='DWARF'>DWARF</option>
@@ -61,7 +61,7 @@
     +
 </select>
 <br>
-<label for='input_profession_new' class="label_create">Profession</label>
+<label for='input_profession_new' class='label_create'>Profession</label>
 <select id='input_profession_new'> +
     <option selected value='WARRIOR'>WARRIOR</option>
     +
@@ -79,21 +79,21 @@
     +
 </select>
 <br>
-<label for='input_level_new' class="label_create">Level</label>
+<label for='input_level_new' class='label_create'>Level</label>
 <input type='number' id='input_level_new' name="level" min="0" max="100">
 <br>
-<label for='input_birthday_new' class="label_create">Birthday</label>
+<label for='input_birthday_new' class='label_create'>Birthday</label>
 <input type='date' id='input_birthday_new' name="birthday" min="2000-01-01" max="3000-12-31">
 <br>
-<label for='input_banned_new' class="label_create"  width="300px">Banned</label>
+<label for='input_banned_new' class='label_create'>Banned</label>
 <select id='input_banned_new' name="banned">
     <option selected value='false'>false</option>
     <option value='true'>true</option>
 </select>
 
 <br>
-<span class="create-button">
-    <button type="submit" onclick="creat_account()">Save</button>
+<span >
+    <button type="submit" class='create-button' onclick="creat_account()">Save</button>
 </span>
 
 
