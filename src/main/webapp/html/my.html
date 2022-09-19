@@ -1,15 +1,24 @@
-<html>
+<html lang="ru">
 <head>
     <title>RPG</title>
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <link href="/css/my.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha512-Dop/vW3iOtayerlYAqCgkVr2aTr2ErwwTYOvRFUpzl2VhCMJyjQF0Q9TjUXIo6JhuM/3i0vVEt2e/7QQmnHQqw==" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css"
+          integrity="sha512-Dop/vW3iOtayerlYAqCgkVr2aTr2ErwwTYOvRFUpzl2VhCMJyjQF0Q9TjUXIo6JhuM/3i0vVEt2e/7QQmnHQqw=="
+          crossorigin="anonymous">
     <!-- Дополнительные стили Bootstrap (не обязательно) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha512-iy8EXLW01a00b26BaqJWaCmk9fJ4PsMdgNRqV96KwMPSH+blO82OHzisF/zQbRIIi8m0PiO10dpS0QxrcXsisw==" crossorigin="anonymous">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap-theme.min.css"
+          integrity="sha512-iy8EXLW01a00b26BaqJWaCmk9fJ4PsMdgNRqV96KwMPSH+blO82OHzisF/zQbRIIi8m0PiO10dpS0QxrcXsisw=="
+          crossorigin="anonymous">
     <!-- jQuery (необходим для Bootstrap JS) -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
+            integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg=="
+            crossorigin="anonymous"></script>
     <!-- Bootstrap JS -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha512-oBTprMeNEKCnqfuqKd6sbvFzmFQtlXS3e0C/RGFV0hD6QzhHV+ODfaQbAlmY6/q0ubbwlAM/nCJjkrgA3waLzg==" crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"
+            integrity="sha512-oBTprMeNEKCnqfuqKd6sbvFzmFQtlXS3e0C/RGFV0hD6QzhHV+ODfaQbAlmY6/q0ubbwlAM/nCJjkrgA3waLzg=="
+            crossorigin="anonymous"></script>
 </head>
 
 <body class="html_body" onload="show_list(0)">
@@ -44,77 +53,111 @@
 
 <h2 id="h_1">Create new account</h2>
 <br>
-
-<label for='input_name_new' class='label_create'>Name</label>
-<input type='text' id='input_name_new' name='name' required size="15" maxlength="12">
+<span>Creating a new account using a modal window, the form below will not be available</span>
 <br>
-<label for='input_title_new' class='label_create'>Title</label>
-<input type='text' id='input_title_new' name='title' required size="30" maxlength="30">
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal" onclick="save_modal_account()">
+    Create
+</button>
 <br>
-<label for='input_race_new' class='label_create'>Race</label>
-<select id='input_race_new'> +
-    <option selected value='HUMAN'>HUMAN</option>
-    +
-    <option value='DWARF'>DWARF</option>
-    +
-    <option value='ELF'>ELF</option>
-    +
-    <option value='GIANT'>GIANT</option>
-    +
-    <option value='ORC'>ORC</option>
-    +
-    <option value='TROLL'>TROLL</option>
-    +
-    <option value='HOBBIT'>HOBBIT</option>
-    +
-</select>
 <br>
-<label for='input_profession_new' class='label_create'>Profession</label>
-<select id='input_profession_new'> +
-    <option selected value='WARRIOR'>WARRIOR</option>
-    +
-    <option value='ROGUE'>ROGUE</option>
-    +
-    <option value='SORCERER'>SORCERER</option>
-    +
-    <option value='CLERIC'>CLERIC</option>
-    +
-    <option value='PALADIN'>PALADIN</option>
-    +
-    <option value='WARLOCK'>WARLOCK</option>
-    +
-    <option value='DRUID'>DRUID</option>
-    +
-</select>
+<span id="title_form">Creating a new account using the form below</span>
 <br>
-<label for='input_level_new' class='label_create'>Level</label>
-<input type='number' id='input_level_new' name="level" min="0" max="100">
-<br>
-<label for='input_birthday_new' class='label_create'>Birthday</label>
-<input type='date' id='input_birthday_new' name="birthday" min="2000-01-01" max="3000-12-31">
-<br>
-<label for='input_banned_new' class='label_create'>Banned</label>
-<select id='input_banned_new' name="banned">
-    <option selected value='false'>false</option>
-    <option value='true'>true</option>
-</select>
-
-<br>
-<span>
-    <button type="submit" class='create-button' onclick="creat_account()">Save</button>
-</span>
 <br>
 
-<button type="button" class="btn btn-primary" data-toggle="popover" title="Message" data-content="Bootstrap 4 work">Bring cursor here</button>
+<div id="create_block">
+    <label for='input_name_new' class='label_create'>Name</label>
+    <input type='text' id='input_name_new' name='name' required size="15" maxlength="12">
+    <br>
+    <label for='input_title_new' class='label_create'>Title</label>
+    <input type='text' id='input_title_new' name='title' required size="30" maxlength="30">
+    <br>
+    <label for='input_race_new' class='label_create'>Race</label>
+    <select id='input_race_new'> +
+        <option selected value='HUMAN'>HUMAN</option>
+        +
+        <option value='DWARF'>DWARF</option>
+        +
+        <option value='ELF'>ELF</option>
+        +
+        <option value='GIANT'>GIANT</option>
+        +
+        <option value='ORC'>ORC</option>
+        +
+        <option value='TROLL'>TROLL</option>
+        +
+        <option value='HOBBIT'>HOBBIT</option>
+        +
+    </select>
+    <br>
+    <label for='input_profession_new' class='label_create'>Profession</label>
+    <select id='input_profession_new'> +
+        <option selected value='WARRIOR'>WARRIOR</option>
+        +
+        <option value='ROGUE'>ROGUE</option>
+        +
+        <option value='SORCERER'>SORCERER</option>
+        +
+        <option value='CLERIC'>CLERIC</option>
+        +
+        <option value='PALADIN'>PALADIN</option>
+        +
+        <option value='WARLOCK'>WARLOCK</option>
+        +
+        <option value='DRUID'>DRUID</option>
+        +
+    </select>
+    <br>
+    <label for='input_level_new' class='label_create'>Level</label>
+    <input type='number' id='input_level_new' name="level" min="0" max="100">
+    <br>
+    <label for='input_birthday_new' class='label_create'>Birthday</label>
+    <input type='date' id='input_birthday_new' name="birthday" min="2000-01-01" max="3000-12-31">
+    <br>
+    <label for='input_banned_new' class='label_create'>Banned</label>
+    <select id='input_banned_new' name="banned">
+        <option selected value='false'>false</option>
+        <option value='true'>true</option>
+    </select>
+    <br>
+    <button type="submit" id='create-button' data-dismiss="modal" onclick="creat_account()">Save</button>
+</div>
+<br>
+<br>
+
+<!-- Bootstrap 4 modal window -->
+<div class="modal fade" id="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background: burlywood">
+                <h5 class="modal-title">Create user</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div id="data_win" class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<br>
 
 <!-- После подключения jQuery, Popper и Bootstrap JS -->
 <script>
     $(function () {
-        $('[data-toggle="popover"]').popover({trigger:'hover'});
+        $('[data-toggle="popover"]').popover({trigger: 'hover'});
     });
 </script>
 
 <script>
+    function save_modal_account() {
+        let create_win = document.getElementById("create_block");
+        $("#data_win").append(create_win);
+    }
+</script>
+
+<script>
+
     function show_list(page_number) {
         $("tr:has(td)").remove();
         let url = "/rest/players?";
@@ -263,12 +306,13 @@
     }
 
     function save_account(id, pageNumber) {
+        let create_win = document.getElementById("create_block");
+        console.log(create_win.innerHTML);
         let name_input = document.getElementById("input_name_" + id);
         let title_input = document.getElementById("input_title_" + id);
         let race_input = document.getElementById("race_select_" + id);
         let profession_input = document.getElementById("profession_select_" + id);
         let banned_input = document.getElementById("banned_select_" + id);
-
         let url = "/rest/players/" + id;
 
         $.ajax({
@@ -291,6 +335,7 @@
     }
 
     function creat_account() {
+
         let name_input = document.getElementById("input_name_new");
         let title_input = document.getElementById("input_title_new");
         let race_input = document.getElementById("input_race_new");
@@ -299,7 +344,7 @@
         let birthday_input = document.getElementById("input_birthday_new");
         let banned_input = document.getElementById("input_banned_new");
         let current_page = document.getElementsByClassName("click_active");
-        let number_current_page = parseInt(current_page[0].id.substring(current_page[0].id.lastIndexOf("_") + 1));
+        let number_current_page = current_page[0].innerHTML;
 
         let url = "/rest/players/";
         $.ajax({
@@ -319,7 +364,7 @@
             }),
             statusCode: {
                 400: function () {
-                    alert("Еhe entered data is not correct");
+                    alert("The entered data is not correct");
                 },
                 404: function () {
                     alert("Page not found");
@@ -334,7 +379,7 @@
                 birthday_input.value = "";
                 banned_input.value = "false";
 
-                /*show_list(number_current_page);*/
+                // show_list(number_current_page - 1);
                 let totalCount = getTotalCount();
                 let countPerPage = $('#counter').val();
                 let end_page = Math.ceil(totalCount / countPerPage) - 1;
