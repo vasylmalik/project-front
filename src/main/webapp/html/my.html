@@ -3,9 +3,297 @@
     <title>RPG</title>
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <link href="/css/my.css" rel="stylesheet">
+    <style>
+        table, th, td {
+            border: 1px solid black;
+        }
+         #pagesLine button.active {
+             font-weight: bold;
+             color: deeppink;
+         }
+
+        tr.title {
+            font-weight: bold;
+            background: lightskyblue;
+        }
+        div#addAccountForm label {
+            width:100px;
+            float: left;
+        }
+        div#addAccountForm input, div#addAccountForm select {
+            width:200px;
+        }
+    </style>
+
 </head>
 <body>
 <h1>RPG admin panel</h1>
+
+<label for="countPerPage">Count per page:</label>
+<select id="countPerPage">
+    <option>5</option>
+    <option>15</option>
+    <option>20</option>
+</select>
+
+<table id="table">
+    <tbody>
+    <tr class="title">
+        <td style="width: 25px">#</td>
+        <td style="width: 100px">Name</td>
+        <td style="width: 200px">Title</td>
+        <td style="width: 100px">Race</td>
+        <td style="width: 100px">Profession</td>
+        <td style="width: 50px">Level</td>
+        <td style="width: 80px">Birthday</td>
+        <td style="width: 60px">Banned</td>
+        <td>Edit</td>
+        <td>Delete</td>
+    </tr>
+    </tbody>
+</table>
+Pages: <span id="pagesLine"></span>
+
+<hr>
+<h2>Create new account: </h2>
+
+<div id="addAccountForm">
+    <div>
+        <label for="name">Name: </label>
+        <input type="text" name="name" id="name" minlength="1" maxlength="12" required>
+    </div>
+    <div>
+        <label for="title">Title: </label>
+        <input type="text" name="title" id="title" minlength="1" maxlength="30" required>
+    </div>
+    <div>
+        <label for="race">Race: </label>
+        <select name="race" id="race" required>
+            <option>HUMAN</option>
+            <option>DWARF</option>
+            <option>ELF</option>
+            <option>GIANT</option>
+            <option>ORC</option>
+            <option>TROLL</option>
+            <option>HOBBIT</option>
+        </select>
+    </div>
+    <div>
+        <label for="profession">Profession: </label>
+        <select name="profession" id="profession" required>
+            <option>WARRIOR</option>
+            <option>ROGUE</option>
+            <option>SORCERER</option>
+            <option>CLERIC</option>
+            <option>PALADIN</option>
+            <option>NAZGUL</option>
+            <option>WARLOCK</option>
+            <option>DRUID</option>
+        </select>
+    </div>
+    <div>
+        <label for="level">Level: </label>
+        <input type="number" id="level" min="0" max="100" required>
+    </div>
+    <div>
+        <label for="birthday">Birthday: </label>
+        <input type="date" name="birthday" id="birthday" required>
+    </div>
+    <div>
+        <label for="banned">Banned: </label>
+        <select name="banned" id="banned" required>
+            <option>true</option>
+            <option>false</option>
+        </select>
+    </div>
+    <div>
+        <button id="submit">Save</button>
+    </div>
+</div>
+
+<script>
+    function printTableData(pageNumber, pageSize) {
+        let xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("GET", `/rest/players?pageNumber=${pageNumber}&pageSize=${pageSize}`, false);
+        xmlHttp.send(null);
+        let response = JSON.parse(xmlHttp.responseText);
+        $("#table tbody tr:not(.title)").remove();
+        let countPerPage = $("#countPerPage option:selected").val();
+        for (const element of response) {
+            let row = $('<tr>');
+            let deleteButton = $('<img class="delete" src="/img/delete.png">');
+            deleteButton[0].addEventListener('click', (event) => {
+                deleteAccount(element.id);
+                printTableData(currentPageNumber, countPerPage);
+                printPagination();
+            });
+
+            let editButton = $('<img class="edit" src="/img/edit.png">');
+            editButton[0].addEventListener('click', (event) => {
+                switchToEditMode(row[0]);
+                editOnClick(row[0]);
+            });
+
+            let saveButton = $('<img class="save" src="/img/save.png" style="display: none;">');
+            saveButton[0].addEventListener('click', (event) => {
+                let account = prepareAccountFromTableRow(row[0]);
+                saveAccount(element.id, account);
+                printTableData(currentPageNumber, countPerPage);
+                printPagination();
+            });
+
+            $("#table").find('tbody')
+                .append(row
+                    .append($('<td>').append(element.id))
+                    .append($('<td>').append(element.name))
+                    .append($('<td>').append(element.title))
+                    .append($('<td>').append(element.race))
+                    .append($('<td>').append(element.profession))
+                    .append($('<td>').append(element.level))
+                    .append($('<td>').append(new Date(element.birthday).toLocaleDateString("en-US")))
+                    .append($('<td>').append(element.banned.toString()))
+                    .append($('<td>').append(editButton).append(saveButton))
+                    .append($('<td>').append(deleteButton))
+                );
+        }
+        currentPageNumber = pageNumber;
+    }
+
+    function deleteAccount(accountId) {
+        let xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("DELETE", `/rest/players/${accountId}`, false);
+        xmlHttp.send(null);
+    }
+
+    function saveAccount(accountId, account) {
+        let xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("POST", `/rest/players/${accountId}`, false);
+        xmlHttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xmlHttp.send(JSON.stringify(account));
+    }
+
+    function addAccount(account) {
+        let xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("POST", `/rest/players`, false);
+        xmlHttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xmlHttp.send(JSON.stringify(account));
+    }
+
+    function printPagination() {
+        let xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("GET", "/rest/players/count", false);
+        xmlHttp.send(null);
+        let count = xmlHttp.responseText;
+        let countPerPage = $("#countPerPage option:selected").val();
+        $("#pagesLine button").remove();
+        let pagesCount = Math.ceil(count / countPerPage);
+        let pagesLineElement = $("#pagesLine");
+        for (let i = 0; i < pagesCount; i++) {
+            let button;
+            if (i === currentPageNumber) {
+                button = $('<button class="active">');
+            } else {
+                button = $('<button>');
+            }
+            button[0].addEventListener('click', (event) => {
+                let pageNumber = event.target.innerText - 1;
+                printTableData(pageNumber, countPerPage);
+                printPagination();
+            });
+            pagesLineElement.append(button.append(i + 1));
+        }
+    }
+
+    function switchToEditMode(row) {
+        $(row).find('.delete').toggle();
+        $(row).find('.edit').toggle();
+        $(row).find('.save').toggle();
+    }
+
+    function editOnClick(row) {
+        convertToInputText(row, 1);
+        convertToInputText(row, 2);
+        convertToSelect(row, 3, ['HUMAN', 'DWARF', 'ELF', 'GIANT', 'ORC', 'TROLL', 'HOBBIT']);
+        convertToSelect(row, 4, ['WARRIOR', 'ROGUE', 'SORCERER', 'CLERIC', 'PALADIN', 'NAZGUL', 'WARLOCK', 'DRUID']);
+        convertToSelect(row, 7, ['true', 'false']);
+    }
+
+    function convertToInputText(row, fieldIndex) {
+        let value = $(row).find('td')[fieldIndex].innerText;
+        $(row).find('td')[fieldIndex].innerText = '';
+        $(row).find('td').eq(fieldIndex).append($(`<input type="text" value="${value}">`));
+    }
+
+    function convertToSelect(row, fieldIndex, optionArray) {
+        let value = $(row).find('td')[fieldIndex].innerText;
+        $(row).find('td')[fieldIndex].innerText = '';
+        let select = $('<select>');
+        for (const option of optionArray) {
+            if (option === value) {
+                select.append($('<option selected>').append(option));
+            } else {
+                select.append($('<option>').append(option));
+            }
+        }
+        $(row).find('td').eq(fieldIndex).append(select);
+    }
+
+    function prepareAccountFromTableRow(row) {
+        let name = $(row).find('td').eq(1).children('input')[0].value;
+        let title = $(row).find('td').eq(2).children('input')[0].value;
+        let race = $(row).find('td').eq(3).children('select')[0].value;
+        let profession = $(row).find('td').eq(4).children('select')[0].value;
+        let banned = $(row).find('td').eq(7).children('select')[0].value;
+        return {name:name, title:title, race:race, profession:profession, banned:banned};
+    }
+
+    function prepareAccountFromForm() {
+        let form = $('#addAccountForm');
+
+        let name = form.find('#name')[0].value;
+        let title = form.find('#title')[0].value;
+        let race = form.find('#race')[0].value;
+        let profession = form.find('#profession')[0].value;
+        let level = form.find('#level')[0].value;
+        let birthday = form.find('#birthday')[0].valueAsNumber;
+        let banned = form.find('#banned')[0].value;
+        return {name:name, title:title, race:race, profession:profession, level:level, birthday:birthday, banned:banned};
+    }
+
+    function clearAccountForm() {
+        let form = $('#addAccountForm');
+
+        form.find('#name')[0].value = '';
+        form.find('#title')[0].value = '';
+        form.find('#race').val($("#race option:first").val());
+        form.find('#profession').val($("#profession option:first").val());
+        form.find('#level')[0].value = '';
+        form.find('#birthday')[0].value = '';
+        form.find('#banned').val($("#banned option:first").val());
+    }
+
+    const params = new Proxy(new URLSearchParams(window.location.search), {
+        get: (searchParams, prop) => searchParams.get(prop),
+    });
+
+    let currentPageNumber = params.pageNumber ? params.pageNumber : 0;
+    printTableData(currentPageNumber, 5);
+    printPagination();
+
+    document.getElementById("countPerPage").addEventListener('change', (event) => {
+        printTableData(0, event.target.value);
+        printPagination();
+    });
+
+    document.getElementById("submit").addEventListener('click', (event) => {
+       let account = prepareAccountFromForm();
+       addAccount(account);
+       clearAccountForm();
+       let countPerPage = $("#countPerPage option:selected").val();
+       printTableData(currentPageNumber, countPerPage);
+       printPagination();
+    });
+</script>
 
 </body>
 </html>
