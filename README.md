@@ -1,1 +1,1 @@
-the creation of a front -end according to the task, an additionally made a modal window for Bootstrap 4
+the creation of a frontend according to the task, an additionally made a modal window for Bootstrap 4

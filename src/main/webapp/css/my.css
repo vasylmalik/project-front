@@ -41,7 +41,7 @@ th, td {
 }
 
 /*label*/
-.label_create {
+#create_block .label_create {
     display: inline-block;
     user-select: none;
     background-color: #555;
@@ -53,7 +53,7 @@ th, td {
     position: relative;
     height: auto;
     top: 1px;
-    width: 200px;
+    width: calc(10% - 1px);
     box-sizing: border-box;
 }
 
@@ -71,6 +71,22 @@ th, td {
 
 #create_block{
     background: #f5f5dc;
+}
+
+#data_win #create_block .label_create {
+    display: inline-block;
+    user-select: none;
+    background-color: #555;
+    color: white;
+    border: 1px solid black;
+    padding: 3px;
+    font-size: 16px;
+    cursor: pointer;
+    position: relative;
+    height: auto;
+    top: 1px;
+    width: calc(20% - 1px);
+    box-sizing: border-box;
 }
 
 
