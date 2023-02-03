@@ -8,6 +8,6 @@ We will make an admin panel to manage online game accounts.<br>
 To do this:<br>
 - Make a fork from the repository; 
 - Download your version of the project to your computer;
-- Download Tomcat;
+- Download and install Tomcat;
 - Add HTML, CSS, JS, jQuery;
 - Pour the changes into your GitHub repository and send the link to it to your teacher. <br>
