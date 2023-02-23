@@ -2,10 +2,43 @@
 <head>
     <title>RPG</title>
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
+    <script>
+        $.get("/rest/players", function (data) {
+            console.log(data);
+            $.each(data, function (key, value) {
+                $.each(value, function (k, v) {
+                    console.log(v);
+                    $( "#my-id" ).html(v);
+                });
+            });
+        });
+    </script>
     <link href="/css/my.css" rel="stylesheet">
 </head>
 <body>
 <h1>RPG admin panel</h1>
+<table>
+    <tr>
+        <th id="my-id">#</th>
+        <th>Name</th>
+        <th>Title</th>
+        <th>Race</th>
+        <th>Profession</th>
+        <th>Level</th>
+        <th>Birthday</th>
+        <th>Banned</th>
+    </tr>
+    <tr>
+        <tb></tb>
+        <tb></tb>
+        <tb></tb>
+        <tb></tb>
+        <tb></tb>
+        <tb></tb>
+        <tb></tb>
+        <tb></tb>
+    </tr>
+</table>
 
 </body>
 </html>
