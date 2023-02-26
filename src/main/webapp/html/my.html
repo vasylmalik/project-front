@@ -11,6 +11,11 @@
                 table.append(row);
             });
         });
+        $.get('/rest/players/count', function (data) {
+            for (let i = 1; i <= data; i++) {
+                $('#page-number').append('<button>'+ i +'</button>');
+            }
+        });
 
         $(document).ready(function () {
             $("#my-table").addClass("table");
@@ -66,7 +71,7 @@
 </table>
 <div>
     <caption>Pages:</caption>
-    <button>1</button>
+    <div id="page-number"></div>
 </div>
 </body>
 </html>
