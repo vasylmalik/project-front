@@ -16,7 +16,7 @@
             $("#my-table").addClass("table");
         });
 
-        document.addEventListener("DOMContentLoaded", function () {
+        $(document).ready(function () {
             const dropdown = document.getElementById("myDropdown");
             dropdown.addEventListener("click", function () {
                 const selectedNumber = dropdown.options[dropdown.selectedIndex].value;
@@ -32,6 +32,7 @@
                 });
             });
         });
+
     </script>
     <link href="/css/my.css" rel="stylesheet">
 </head>
