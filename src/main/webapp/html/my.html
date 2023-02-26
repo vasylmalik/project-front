@@ -4,7 +4,7 @@
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <script>
         $.get("/rest/players", function (data) {
-            var table = $("#my-table");
+            var table = $("#t-body");
             $.each(data, function (i, members) {
                 var row = $("<tr><td>" + (i + 1) + "</td><td>" + members.name + "</td><td>" + members.title + "</td><td>" + members.race + "</td><td>" + members.profession + "</td><td>"
                     + members.level + "</td><td>" + members.birthday + "</td><td>" + members.banned + "</td></tr>");
@@ -22,7 +22,7 @@
                 const selectedNumber = dropdown.options[dropdown.selectedIndex].value;
                 $.get("/rest/players/?pageNumber=0&pageSize=" + selectedNumber + "", function (data) {
                     var table = $("#my-table");
-                    const t = document.getElementById("my-table");
+                    const t = document.getElementById("t-body");
                     t.innerHTML = "";
                     $.each(data, function (i, members) {
                         var row = $("<tr><td>" + (i + 1) + "</td><td>" + members.name + "</td><td>" + members.title + "</td><td>" + members.race + "</td><td>" + members.profession + "</td><td>"
@@ -48,16 +48,21 @@
     </select>
 </div>
 <table id="my-table">
-    <tr>
-        <th>#</th>
-        <th>Name</th>
-        <th>Title</th>
-        <th>Race</th>
-        <th>Profession</th>
-        <th>Level</th>
-        <th>Birthday</th>
-        <th>Banned</th>
-    </tr>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Title</th>
+            <th>Race</th>
+            <th>Profession</th>
+            <th>Level</th>
+            <th>Birthday</th>
+            <th>Banned</th>
+        </tr>
+    </thead>
+    <tbody id="t-body">
+
+    </tbody>
 </table>
 <div>
     <caption>Pages:</caption>
