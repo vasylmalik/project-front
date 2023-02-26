@@ -4,11 +4,31 @@
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <script>
         $.get("/rest/players", function (data) {
-            console.log(data);
-            $.each(data, function (key, value) {
-                $.each(value, function (k, v) {
-                    console.log(v);
-                    $( "#my-id" ).html(v);
+            var table = $("#my-table");
+            $.each(data, function (i, members) {
+                var row = $("<tr><td>" + (i + 1) + "</td><td>" + members.name + "</td><td>" + members.title + "</td><td>" + members.race + "</td><td>" + members.profession + "</td><td>"
+                    + members.level + "</td><td>" + members.birthday + "</td><td>" + members.banned + "</td></tr>");
+                table.append(row);
+            });
+        });
+
+        $(document).ready(function () {
+            $("#my-table").addClass("table");
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const dropdown = document.getElementById("myDropdown");
+            dropdown.addEventListener("click", function () {
+                const selectedNumber = dropdown.options[dropdown.selectedIndex].value;
+                $.get("/rest/players/?pageNumber=0&pageSize=" + selectedNumber + "", function (data) {
+                    var table = $("#my-table");
+                    const t = document.getElementById("my-table");
+                    t.innerHTML = "";
+                    $.each(data, function (i, members) {
+                        var row = $("<tr><td>" + (i + 1) + "</td><td>" + members.name + "</td><td>" + members.title + "</td><td>" + members.race + "</td><td>" + members.profession + "</td><td>"
+                            + members.level + "</td><td>" + members.birthday + "</td><td>" + members.banned + "</td></tr>");
+                        table.append(row);
+                    });
                 });
             });
         });
@@ -17,9 +37,19 @@
 </head>
 <body>
 <h1>RPG admin panel</h1>
-<table>
+<h2>Accounts list:</h2>
+<div>
+    <caption>Count per page:</caption>
+    <select id="myDropdown">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="15">15</option>
+        <option value="20">20</option>
+    </select>
+</div>
+<table id="my-table">
     <tr>
-        <th id="my-id">#</th>
+        <th>#</th>
         <th>Name</th>
         <th>Title</th>
         <th>Race</th>
@@ -28,17 +58,10 @@
         <th>Birthday</th>
         <th>Banned</th>
     </tr>
-    <tr>
-        <tb></tb>
-        <tb></tb>
-        <tb></tb>
-        <tb></tb>
-        <tb></tb>
-        <tb></tb>
-        <tb></tb>
-        <tb></tb>
-    </tr>
 </table>
-
+<div>
+    <caption>Pages:</caption>
+    <button>1</button>
+</div>
 </body>
 </html>
