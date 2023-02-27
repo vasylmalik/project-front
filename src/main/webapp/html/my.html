@@ -11,15 +11,6 @@
                 table.append(row);
             });
         });
-        $.get('/rest/players/count', function (data) {
-            for (let i = 1; i <= data; i++) {
-                $('#page-number').append('<button>'+ i +'</button>');
-            }
-        });
-
-        $(document).ready(function () {
-            $("#my-table").addClass("table");
-        });
 
         $(document).ready(function () {
             $('#myDropdown').click(() => {
@@ -33,6 +24,16 @@
                             + members.level + "</td><td>" + members.birthday + "</td><td>" + members.banned + "</td></tr>");
                         table.append(row);
                     });
+                });
+
+                $.get('/rest/players/count', function (data) {
+                    let pageSize = $('#myDropdown').val();
+                    let chunk = Math.ceil(data / pageSize);
+                    const numberButton = document.getElementById('page-number');
+                    numberButton.innerHTML = '';
+                    for (let i = 1; i <= chunk; i++) {
+                        $('#page-number').append('<button>'+ i +'</button>');
+                    }
                 });
             });
         });
@@ -52,7 +53,7 @@
         <option value="20">20</option>
     </select>
 </div>
-<table id="my-table">
+<table id="my-table" class="table">
     <thead>
         <tr>
             <th>#</th>
