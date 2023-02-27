@@ -3,7 +3,7 @@
     <title>RPG</title>
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <script>
-        $.get("/rest/players", function (data) {
+        $.get("/rest/players/?pageNumber=0&pageSize=5", function (data) {
             var table = $("#t-body");
             $.each(data, function (i, members) {
                 var row = $("<tr><td>" + (i + 1) + "</td><td>" + members.name + "</td><td>" + members.title + "</td><td>" + members.race + "</td><td>" + members.profession + "</td><td>"
@@ -12,9 +12,24 @@
             });
         });
 
+        $.get('/rest/players/count', function (data) {
+            let pageSize = $('#myDropdown').val();
+            let chunk = Math.ceil(data / pageSize);
+            const numberButton = document.getElementById('page-number');
+            numberButton.innerHTML = '';
+            for (let i = 1; i <= chunk; i++) {
+                let button = $('<button>'+ i +'</button>');
+                $('#page-number').append(button);
+                button.attr('id', 'b-num');
+                button.attr('value', i);
+            }
+        });
+
         $(document).ready(function () {
             $('#myDropdown').click(() => {
-                var pageSize = $('#myDropdown').val();
+
+                let pageSize = $('#myDropdown').val();
+
                 $.get('/rest/players/?pageNumber=0&pageSize=' + pageSize + '', function (data) {
                     var table = $('#my-table');
                     const t = document.getElementById('t-body');
@@ -27,13 +42,26 @@
                 });
 
                 $.get('/rest/players/count', function (data) {
-                    let pageSize = $('#myDropdown').val();
                     let chunk = Math.ceil(data / pageSize);
                     const numberButton = document.getElementById('page-number');
                     numberButton.innerHTML = '';
                     for (let i = 1; i <= chunk; i++) {
-                        $('#page-number').append('<button>'+ i +'</button>');
+                        let button = $('<button>'+ i +'</button>');
+                        $('#page-number').append(button);
+                        button.attr('id', 'b-num');
+                        button.attr('value', i);
                     }
+                });
+            });
+
+            $('#page-number').click(() => {
+                let pageSize = $('#myDropdown').val();
+                let pageNumber = $('#b-num').attr('value');
+                console.log($(this));
+                console.log(pageNumber);
+                $.get('/rest/players/?pageNumber=' + pageNumber + '&pageSize=' + pageSize + '', function (data) {
+                    console.log(data);
+                    console.log(pageNumber);
                 });
             });
         });
@@ -46,14 +74,14 @@
 <h2>Accounts list:</h2>
 <div>
     <caption>Count per page:</caption>
-    <select id="myDropdown">
-        <option value="5">5</option>
-        <option value="10">10</option>
-        <option value="15">15</option>
-        <option value="20">20</option>
+    <select id='myDropdown'>
+        <option value='5'>5</option>
+        <option value='10'>10</option>
+        <option value='15'>15</option>
+        <option value='20'>20</option>
     </select>
 </div>
-<table id="my-table" class="table">
+<table id='my-table' class='table'>
     <thead>
         <tr>
             <th>#</th>
@@ -66,13 +94,13 @@
             <th>Banned</th>
         </tr>
     </thead>
-    <tbody id="t-body">
+    <tbody id='t-body'>
 
     </tbody>
 </table>
 <div>
     <caption>Pages:</caption>
-    <div id="page-number"></div>
+    <div id='page-number'></div>
 </div>
 </body>
 </html>
