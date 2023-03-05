@@ -54,18 +54,22 @@
                 });
             });
 
-            $('#page-number').click(() => {
+            $('#page-number').on('click', 'button', function() {
                 let pageSize = $('#myDropdown').val();
-                let pageNumber = $('#b-num').attr('value');
-                console.log($(this));
-                console.log(pageNumber);
+                let pageNumber = $(this).val() - 1;
                 $.get('/rest/players/?pageNumber=' + pageNumber + '&pageSize=' + pageSize + '', function (data) {
-                    console.log(data);
-                    console.log(pageNumber);
+                    var table = $('#my-table');
+                    const t = document.getElementById('t-body');
+                    t.innerHTML = '';
+                    $.each(data, function (i, members) {
+                        console.log(data);
+                        var row = $("<tr><td>"  + (i + data[0].id) + "</td><td>" + members.name + "</td><td>" + members.title + "</td><td>" + members.race + "</td><td>" + members.profession + "</td><td>"
+                            + members.level + "</td><td>" + members.birthday + "</td><td>" + members.banned + "</td></tr>");
+                        table.append(row);
+                    });
                 });
             });
         });
-
     </script>
     <link href="/css/my.css" rel="stylesheet">
 </head>
