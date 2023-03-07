@@ -17,6 +17,7 @@ $(document).ready(function () {
                     <td>${member.level}</td>
                     <td>${member.birthday}</td>
                     <td>${member.banned}</td>
+                    <td><img src="img/edit.png" alt="Edit"></td>
                     </tr>`;
                 table.append(row);
             });
@@ -33,6 +34,18 @@ $(document).ready(function () {
                 pageNumber.append(button);
                 button.attr('id', 'b-num');
                 button.attr('value', i);
+                // Подкрасим номер текущей страницы
+                if (i === pageNumber) {
+                    button.addClass('active-page');
+                }
+                button.click(function () {
+                    // Находим текущую активную страницу и снимаем с нее выделение
+                    $('#page-number .active-page').removeClass('active-page');
+                    // Изменяем фон только у кнопки, на которую кликнули
+                    $(this).addClass('active-page');
+                    // Вызываем функцию для загрузки данных для новой страницы
+                    loadAccounts(pageSize, $(this).val());
+                });
             }
         });
     }
