@@ -15,9 +15,10 @@ $(document).ready(function () {
                     <td>${member.race}</td>
                     <td>${member.profession}</td>
                     <td>${member.level}</td>
-                    <td>${member.birthday}</td>
+                    <td>${new Date(member.birthday).toLocaleDateString()}</td>
                     <td>${member.banned}</td>
-                    <td><img src="img/edit.png" alt="Edit"></td>
+                    <td><button id="button-edit"><img src="img/edit.png" alt="Edit"></button></td>
+                    <td><button id="button-delete"><img src="img/delete.png" alt="Delete"></button></td>
                     </tr>`;
                 table.append(row);
             });
@@ -34,6 +35,7 @@ $(document).ready(function () {
                 pageNumber.append(button);
                 button.attr('id', 'b-num');
                 button.attr('value', i);
+
                 // Подкрасим номер текущей страницы
                 if (i === pageNumber) {
                     button.addClass('active-page');
