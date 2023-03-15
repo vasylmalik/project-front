@@ -3,9 +3,152 @@
     <title>RPG</title>
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <link href="/css/my.css" rel="stylesheet">
+    <script>
+        let accountsCount = null;
+        let accountPerPage = 3;
+        let pageNumber = 0;
+        let pages = null;
+
+        window.onload = init;
+
+        function makeTable(pageNumber, accountPerPage) {
+            $.get(`/rest/players?pageNumber=${pageNumber}&pageSize=${accountPerPage}`, (players) => {
+                const getBirthday = (timestamp) => {
+                    const date = new Date(timestamp);
+                    return `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`;
+                }
+
+                const tBody = document.querySelector('.players-table__body');
+                let newRowsHtml = '';
+                players.forEach((player) => newRowsHtml +=
+                    `<tr>
+                            <td class="cell">${player.id}</td>
+                            <td class="cell">${player.name}</td>
+                            <td class="cell">${player.title}</td>
+                            <td class="cell">${player.race}</td>
+                            <td class="cell">${player.profession}</td>
+                            <td class="cell">${player.level}</td>
+                            <td class="cell">${getBirthday(player.birthday)}</td>
+                            <td class="cell">${player.banned}</td>
+                            <td class="cell"><button value=${player.id}><img src="../img/edit.png" alt="edit"/></button></td>
+                            <td class="cell"><button class="remove-button" value=${player.id}><img src="../img/delete.png" alt="delete"/></button></td>
+                            </tr>`);
+
+                Array.from(tBody.children).forEach((row, index) => {
+                    if (index == 0) {
+                        return;
+                    }
+                    row.remove();
+                })
+
+                tBody.insertAdjacentHTML('beforeend', newRowsHtml);
+
+                const removeButtons = document.querySelectorAll('.remove-button');
+                Array.from(removeButtons).forEach((removeButton) => removeButton.addEventListener('click', removePlayer))
+            });
+        }
+
+        function removePlayer(e) {
+            const playerId = e.currentTarget.value;
+            $.ajax({
+                url: `/rest/players/${playerId}`,
+                type: 'DELETE',
+                success: function () {
+                    getPlayersCount();
+                    makeTable(pageNumber, accountPerPage);
+                }
+            });
+        }
+
+        function updatePagination() {
+            pages = accountsCount ? Math.ceil(accountsCount / accountPerPage) : 0;
+            const pagination = document.querySelector('.pagination');
+            const paginationChildrenCount = pagination.children.length;
+
+            let paginationButtonsHtml = '';
+            for (let i = 1; i <= pages; i++) {
+                paginationButtonsHtml += `<button class="pagination__page" value=${i - 1}>${i}</button>`
+            }
+
+            if (paginationChildrenCount !== 0) {
+                Array.from(pagination.children).forEach((node) => node.remove());
+            }
+
+            pagination.insertAdjacentHTML('beforeend', paginationButtonsHtml);
+            Array.from(pagination.children).forEach((button) => button.addEventListener('click', onPageChange));
+
+            changeActivePageView(pageNumber);
+        }
+
+        function changeActivePageView(nextActivePageNumber = 0) {
+            const pagination = document.querySelector('.pagination');
+            const nextActivePage = Array.from(pagination.children)[nextActivePageNumber];
+            const currActivePage = document.querySelector('.pagination__page_active');
+            currActivePage && currActivePage.classList.remove('pagination__page_active');
+            nextActivePage && nextActivePage.classList.add('pagination__page_active');
+            pageNumber = nextActivePageNumber;
+        }
+
+        function getPlayersCount() {
+            $.get('/rest/players/count', (count) => {
+                accountsCount = count;
+                updatePagination();
+            });
+        }
+
+        function onAccountPerPageChange(e) {
+            accountPerPage = e.currentTarget.value;
+            makeTable(pageNumber, accountPerPage);
+            updatePagination();
+        }
+
+        function onPageChange(e) {
+            const pageNumber = e.currentTarget.value;
+            makeTable(pageNumber, accountPerPage);
+            changeActivePageView(pageNumber);
+        }
+
+        function createAccountPerPageSelector(){
+            let optionsHtml = '';
+            const accountPerPageSelect = document.querySelector('.accounts-per-page');
+            accountPerPageSelect.addEventListener('change', onAccountPerPageChange);
+            [3, 5, 10, 20].forEach(step => optionsHtml += `<option value=${step}>${step}</option>`);
+            accountPerPageSelect.insertAdjacentHTML('afterbegin', optionsHtml);
+        }
+
+        function init() {
+            createAccountPerPageSelector();
+            getPlayersCount();
+            makeTable(pageNumber, accountPerPage);
+        }
+    </script>
 </head>
 <body>
 <h1>RPG admin panel</h1>
+<h2>Accounts list:</h2>
 
+<label for="accounts-per-page">Count per page:</label>
+<select class="accounts-per-page" id="accounts-per-page"></select>
+<br>
+
+<table class="players-table">
+    <tbody class="players-table__body">
+    <tr class="players-table__row players-table__row_header">
+        <th class="header-cell header-cell_small">#</th>
+        <th class="header-cell">Name</th>
+        <th class="header-cell">Title</th>
+        <th class="header-cell">Race</th>
+        <th class="header-cell">Profession</th>
+        <th class="header-cell header-cell_small">Level</th>
+        <th class="header-cell">Birthday</th>
+        <th class="header-cell header-cell_small">Banned</th>
+        <th class="header-cell header-cell_auto">Edit</th>
+        <th class="header-cell header-cell_auto">Delete</th>
+    </tr>
+    </tbody>
+</table>
+
+<span>Pages:</span>
+<div class="pagination"></div>
 </body>
 </html>

@@ -1,0 +1,27 @@
+table, th, td {
+    border: 1px solid;
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+.pagination__page_active {
+    color: red;
+}
+
+.cell {
+    text-align: center;
+}
+
+.header-cell {
+    width: 130px;
+}
+
+.header-cell_small {
+    width: 40px;
+}
+
+.header-cell_auto {
+    width: auto;
+}
