@@ -18,7 +18,7 @@ $(document).ready(function () {
                     <td>${new Date(member.birthday).toLocaleDateString()}</td>
                     <td>${member.banned}</td>
                     <td><button id="button-edit"><img src="img/edit.png" alt="Edit"></button></td>
-                    <td><button id="button-delete"><img src="img/delete.png" alt="Delete"></button></td>
+                    <td><button id="button-delete-${member.id}"><img src="img/delete.png" alt="Delete"></button></td>
                     </tr>`;
                 table.append(row);
             });
@@ -31,22 +31,17 @@ $(document).ready(function () {
             let chunk = Math.ceil(data / pageSize);
             pageNumber.empty();
             for (let i = 1; i <= chunk; i++) {
-                let button = $('<button>' + i + '</button>');
+                let button = $('<button><span>' + i + '</span></button>');
                 pageNumber.append(button);
                 button.attr('id', 'b-num');
                 button.attr('value', i);
 
-                // Подкрасим номер текущей страницы
                 if (i === pageNumber) {
-                    button.addClass('active-page');
+                    button.find('span').addClass('active-page');
                 }
                 button.click(function () {
-                    // Находим текущую активную страницу и снимаем с нее выделение
                     $('#page-number .active-page').removeClass('active-page');
-                    // Изменяем фон только у кнопки, на которую кликнули
-                    $(this).addClass('active-page');
-                    // Вызываем функцию для загрузки данных для новой страницы
-                    loadAccounts(pageSize, $(this).val());
+                    $(this).find('span').addClass('active-page');
                 });
             }
         });
@@ -66,4 +61,5 @@ $(document).ready(function () {
         let pageNumber = $(this).val() - 1;
         renderTable(pageSize, pageNumber);
     });
+
 });

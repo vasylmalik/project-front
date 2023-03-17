@@ -38,8 +38,8 @@ td.delete {
     background-size: 25px 25px;
 }
 
-#page-number button.active-page {
-    background-color: red;
+.active-page {
+    color: red;
 }
 
 
