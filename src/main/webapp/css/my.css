@@ -12,16 +12,17 @@ button:hover {
 
 .cell {
     text-align: center;
+    width: 150px;
 }
 
-.header-cell {
-    width: 130px;
-}
-
-.header-cell_small {
+.cell_small {
     width: 40px;
 }
 
-.header-cell_auto {
+.cell_auto {
     width: auto;
+}
+
+.hidden {
+   visibility: hidden;
 }

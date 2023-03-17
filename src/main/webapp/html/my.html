@@ -9,6 +9,10 @@
         let pageNumber = 0;
         let pages = null;
 
+        const RACE_ARRAY = ['HUMAN', 'DWARF', 'ELF', 'GIANT', 'ORC', 'TROLL', 'HOBBIT'];
+        const PROFESSION_ARRAY = ['WARRIOR', 'ROGUE', 'SORCERER', 'CLERIC', 'PALADIN', 'NAZGUL', 'WARLOCK', 'DRUID'];
+        const BANNED_ARRAY = ['true', 'false'];
+
         window.onload = init;
 
         function makeTable(pageNumber, accountPerPage) {
@@ -21,17 +25,17 @@
                 const tBody = document.querySelector('.players-table__body');
                 let newRowsHtml = '';
                 players.forEach((player) => newRowsHtml +=
-                    `<tr>
-                            <td class="cell">${player.id}</td>
-                            <td class="cell">${player.name}</td>
-                            <td class="cell">${player.title}</td>
-                            <td class="cell">${player.race}</td>
-                            <td class="cell">${player.profession}</td>
-                            <td class="cell">${player.level}</td>
+                    `<tr class="row" data-player-id=${player.id}>
+                            <td class="cell cell_small">${player.id}</td>
+                            <td class="cell" data-player-name>${player.name}</td>
+                            <td class="cell" data-player-title>${player.title}</td>
+                            <td class="cell" data-player-race>${player.race}</td>
+                            <td class="cell" data-player-profession>${player.profession}</td>
+                            <td class="cell cell_small">${player.level}</td>
                             <td class="cell">${getBirthday(player.birthday)}</td>
-                            <td class="cell">${player.banned}</td>
-                            <td class="cell"><button value=${player.id}><img src="../img/edit.png" alt="edit"/></button></td>
-                            <td class="cell"><button class="remove-button" value=${player.id}><img src="../img/delete.png" alt="delete"/></button></td>
+                            <td class="cell cell_small" data-player-banned>${player.banned}</td>
+                            <td class="cell cell_auto"><button class="edit-button" value=${player.id}><img src="../img/edit.png" alt="edit"/></button></td>
+                            <td class="cell cell_auto"><button class="remove-button" value=${player.id}><img src="../img/delete.png" alt="delete"/></button></td>
                             </tr>`);
 
                 Array.from(tBody.children).forEach((row, index) => {
@@ -45,6 +49,9 @@
 
                 const removeButtons = document.querySelectorAll('.remove-button');
                 Array.from(removeButtons).forEach((removeButton) => removeButton.addEventListener('click', removePlayer))
+
+                const editButtons = document.querySelectorAll('.edit-button');
+                Array.from(editButtons).forEach((editButton) => editButton.addEventListener('click', editPlayer))
             });
         }
 
@@ -108,12 +115,113 @@
             changeActivePageView(pageNumber);
         }
 
-        function createAccountPerPageSelector(){
+        function createSelectOptions(optionsArray, defaultValue) {
             let optionsHtml = '';
-            const accountPerPageSelect = document.querySelector('.accounts-per-page');
-            accountPerPageSelect.addEventListener('change', onAccountPerPageChange);
-            [3, 5, 10, 20].forEach(step => optionsHtml += `<option value=${step}>${step}</option>`);
-            accountPerPageSelect.insertAdjacentHTML('afterbegin', optionsHtml);
+            optionsArray.forEach(option => optionsHtml += `<option ${defaultValue === option && 'selected'} value=${option}>${option}</option>`);
+            return optionsHtml;
+        }
+
+        function createSelect(optionsArray, defaultValue) {
+            const optionsHtml = createSelectOptions(optionsArray, defaultValue);
+            const select = document.createElement('select');
+            select.insertAdjacentHTML('afterbegin', optionsHtml);
+            select.setAttribute('data-value', defaultValue);
+            select.addEventListener('change', (e) => select.setAttribute('data-value', e.currentTarget.value));
+            return select;
+        }
+
+        function createTextInput(value) {
+            const textInput = document.createElement('input');
+            textInput.setAttribute('type', 'text');
+            textInput.setAttribute('value', value);
+            textInput.setAttribute('data-value', value);
+            textInput.addEventListener('input', (e) => {
+                textInput.setAttribute('data-value', `${e.currentTarget.value}`);
+            });
+            return textInput;
+        }
+
+        function createAccountPerPageSelector() {
+            const host = document.querySelector('.accounts-per-page');
+            const optionsHtml = createSelectOptions([3, 5, 10, 20]);
+            host.addEventListener('change', onAccountPerPageChange);
+            host.insertAdjacentHTML('afterbegin', optionsHtml);
+        }
+
+        function savePlayer({playerId, values}) {
+            console.log(values);
+            const errorMessage = validateFields(values);
+            if (errorMessage) {
+                window.alert(errorMessage);
+                return;
+            }
+            $.ajax({
+                url: `/rest/players/${playerId}`,
+                type: 'POST',
+                data: JSON.stringify(values),
+                dataType: 'json',
+                contentType: "application/json",
+                success: function () {
+                    getPlayersCount();
+                    makeTable(pageNumber, accountPerPage);
+                }
+            });
+        }
+
+        function validateFields(values) {
+            let errorMessage = '';
+
+            const invalid = Object.entries(values).find(([key, value]) => {
+                if (typeof value === 'string') {
+                    return !value;
+                } else if (typeof value === 'boolean') {
+                    return String(value) === '';
+                }
+            })
+
+            if (invalid) {
+                errorMessage = `${invalid[0]} cannot be empty`;
+            }
+
+            return errorMessage;
+        }
+
+        function editPlayer(e) {
+            const playerId = e.currentTarget.value;
+            const currRow = document.querySelector(`.row[data-player-id='${playerId}']`)
+            const currRemoveButton = currRow.querySelector('.remove-button');
+            const currEditImg = currRow.querySelector('.edit-button img');
+            const currName = currRow.querySelector('[data-player-name]');
+            const currTitle = currRow.querySelector('[data-player-title]');
+            const currRace = currRow.querySelector('[data-player-race]');
+            const currProfession = currRow.querySelector('[data-player-profession]');
+            const currBanned = currRow.querySelector('[data-player-banned]');
+
+            if (currEditImg.dataset.editable) {
+                return;
+            }
+            currEditImg.src = "../img/save.png";
+            currEditImg.dataset.editable = true;
+            currEditImg.addEventListener('click', () => {
+                savePlayer({
+                    playerId, values: {
+                        name: currName.childNodes[0].dataset.value,
+                        title: currTitle.childNodes[0].dataset.value,
+                        race: currRace.childNodes[0].dataset.value,
+                        profession: currProfession.childNodes[0].dataset.value,
+                        banned: currBanned.childNodes[0].dataset.value === 'true',
+                    }
+                })
+            });
+            currRemoveButton.classList.add('hidden');
+
+            currName.childNodes[0].replaceWith(createTextInput(currName.innerHTML));
+            currTitle.childNodes[0].replaceWith(createTextInput(currTitle.innerHTML));
+            currRace.childNodes[0].replaceWith(createSelect(RACE_ARRAY, currRace.innerHTML));
+            currProfession.childNodes[0].replaceWith(createSelect(PROFESSION_ARRAY, currProfession.innerHTML));
+            currBanned.childNodes[0].replaceWith(createSelect(BANNED_ARRAY, currBanned.innerHTML));
+
+
         }
 
         function init() {
@@ -134,16 +242,16 @@
 <table class="players-table">
     <tbody class="players-table__body">
     <tr class="players-table__row players-table__row_header">
-        <th class="header-cell header-cell_small">#</th>
+        <th class="header-cell">#</th>
         <th class="header-cell">Name</th>
         <th class="header-cell">Title</th>
         <th class="header-cell">Race</th>
         <th class="header-cell">Profession</th>
-        <th class="header-cell header-cell_small">Level</th>
+        <th class="header-cell">Level</th>
         <th class="header-cell">Birthday</th>
-        <th class="header-cell header-cell_small">Banned</th>
-        <th class="header-cell header-cell_auto">Edit</th>
-        <th class="header-cell header-cell_auto">Delete</th>
+        <th class="header-cell">Banned</th>
+        <th class="header-cell">Edit</th>
+        <th class="header-cell">Delete</th>
     </tr>
     </tbody>
 </table>
