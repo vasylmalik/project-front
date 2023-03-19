@@ -3,13 +3,14 @@ $(document).ready(function () {
     const tableBody = $("#t-body");
     const dropDown = $("#my-dropdown");
     const pageNumber = $("#page-number");
+    let pageNum = pageNumber.val();
 
     function renderTable(pageSize, pageNumber) {
         $.get(`/rest/players/?pageNumber=${pageNumber}&pageSize=${pageSize}`, function (data) {
             tableBody.empty();
             $.each(data, function (i, member) {
                 const row = `<tr>
-                    <td>${i + data[0].id}</td>
+                    <td>${member.id}</td>
                     <td>${member.name}</td>
                     <td>${member.title}</td>
                     <td>${member.race}</td>
@@ -17,8 +18,8 @@ $(document).ready(function () {
                     <td>${member.level}</td>
                     <td>${new Date(member.birthday).toLocaleDateString()}</td>
                     <td>${member.banned}</td>
-                    <td><button id="button-edit"><img src="img/edit.png" alt="Edit"></button></td>
-                    <td><button id="button-delete-${member.id}"><img src="img/delete.png" alt="Delete"></button></td>
+                    <td><button class="btn-edit"><img src="img/edit.png" alt="Edit"></button></td>
+                    <td><button class="btn-delete" data-id="${member.id}"><img src="img/delete.png" alt="Delete"></button></td>
                     </tr>`;
                 table.append(row);
             });
@@ -36,12 +37,13 @@ $(document).ready(function () {
                 button.attr('id', 'b-num');
                 button.attr('value', i);
 
-                if (i === pageNumber) {
+                if (i === pageNum + 1) {
                     button.find('span').addClass('active-page');
                 }
                 button.click(function () {
                     $('#page-number .active-page').removeClass('active-page');
                     $(this).find('span').addClass('active-page');
+
                 });
             }
         });
@@ -56,10 +58,32 @@ $(document).ready(function () {
         renderPaginationButtons();
     });
 
+    function deleteAccount(id) {
+        const btn = $(this);
+        $.ajax({
+            url: `/rest/players/${id}`,
+            type: 'DELETE',
+            success: function () {
+                btn.closest('tr').remove();
+                renderTable(dropDown.val(), pageNum);
+                renderPaginationButtons();
+                console.log(`User with id: ${id} deleted successfully`);
+            },
+            error: function (error) {
+                alert(`Error deleting user: ${error}`);
+            }
+        });
+    }
+
+    tableBody.on('click', '.btn-delete', function () {
+        const id = $(this).data('id');
+        deleteAccount(id);
+    });
+
     pageNumber.on('click', 'button', function () {
         let pageSize = dropDown.val();
-        let pageNumber = $(this).val() - 1;
-        renderTable(pageSize, pageNumber);
+        pageNum = $(this).val() - 1;
+        renderTable(pageSize, pageNum);
     });
 
 });
