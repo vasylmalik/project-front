@@ -149,7 +149,6 @@
         }
 
         function savePlayer({playerId, values}) {
-            console.log(values);
             const errorMessage = validateFields(values);
             if (errorMessage) {
                 window.alert(errorMessage);
@@ -171,17 +170,38 @@
         function validateFields(values) {
             let errorMessage = '';
 
-            const invalid = Object.entries(values).find(([key, value]) => {
+            Object.entries(values).find(([key, value]) => {
                 if (typeof value === 'string') {
-                    return !value;
+                    if (!value) {
+                        errorMessage = `${key} cannot be empty`;
+                        return true;
+                    }
+                    if (key === 'name' && value.length >= 12) {
+                        errorMessage = 'name value length is greater than 12 chars';
+                        return true;
+                    }
+                    if (key === 'title' && value.length >= 30) {
+                        errorMessage = 'title value length is greater than 30 chars';
+                        return true;
+                    }
                 } else if (typeof value === 'boolean') {
                     return String(value) === '';
-                }
-            })
+                } else if (typeof value === 'number') {
+                    if (key === 'level' && (value < 0 || value > 100)) {
+                        errorMessage = 'level value is out of range 0-100';
+                        return true;
+                    }
+                    if (key === 'birthday' && value < 0) {
+                        errorMessage = 'birthday value cannot be negative';
+                        return true;
 
-            if (invalid) {
-                errorMessage = `${invalid[0]} cannot be empty`;
-            }
+                    }
+                    if (key === 'birthday' && isNaN(value)) {
+                        errorMessage = 'birthday  value is not correct';
+                        return true;
+                    }
+                }
+            });
 
             return errorMessage;
         }
@@ -220,14 +240,89 @@
             currRace.childNodes[0].replaceWith(createSelect(RACE_ARRAY, currRace.innerHTML));
             currProfession.childNodes[0].replaceWith(createSelect(PROFESSION_ARRAY, currProfession.innerHTML));
             currBanned.childNodes[0].replaceWith(createSelect(BANNED_ARRAY, currBanned.innerHTML));
+        }
 
+        function getCreateFormFields() {
+            const name = document.getElementById('create-name');
+            const title = document.getElementById('create-title');
+            const race = document.getElementById('create-race');
+            const profession = document.getElementById('create-profession');
+            const level = document.getElementById('create-level');
+            const birthday = document.getElementById('create-birthday');
+            const banned = document.getElementById('create-banned');
+            return {name, title, race, profession, level, birthday, banned};
+        }
 
+        function createPlayer() {
+            const fields = getCreateFormFields();
+            const values = Object.entries(fields).reduce((res, [key, field]) => {
+                if (key === 'birthday') {
+                    return ({...res, [key]: new Date(field.value).getTime()});
+                }
+                if (key === 'banned'){
+                    return ({...res, [key]: field.value === 'true'});
+                }
+                if (key === 'level'){
+                    return ({...res, [key]: field.value ? !isNaN(field.value) && parseInt(field.value) : ''});
+                }
+                return ({...res, [key]: field.value});
+
+            }, {})
+
+            const errorMessage = validateFields(values);
+            if (errorMessage) {
+                window.alert(errorMessage);
+                return;
+            }
+
+            $.ajax({
+                url: '/rest/players',
+                type: 'POST',
+                data: JSON.stringify(values),
+                dataType: 'json',
+                contentType: "application/json",
+                success: function () {
+                    resetCreateForm();
+                    getPlayersCount();
+                    makeTable(pageNumber, accountPerPage);
+                }
+            });
+        }
+
+        function resetCreateForm() {
+            const fields = getCreateFormFields();
+            Object.entries(fields).forEach(([key, field]) => {
+                if (['birthday', 'name', 'title', 'level'].includes(key)){
+                    field.value = '';
+                }
+                if (key === 'race') {
+                    field.value = RACE_ARRAY[0];
+                }
+                if (key === 'profession'){
+                    field.value = PROFESSION_ARRAY[0];
+                }
+                if (key === 'banned') {
+                    field.value = BANNED_ARRAY[0];
+                }
+            })
+        }
+
+        function initCreateForm(){
+            const createRaceHost = document.querySelector('[data-create-race]')
+            createRaceHost.insertAdjacentHTML('afterbegin', createSelectOptions(RACE_ARRAY, RACE_ARRAY[0]));
+
+            const createProfessionHost = document.querySelector('[data-create-profession]')
+            createProfessionHost.insertAdjacentHTML('afterbegin', createSelectOptions(PROFESSION_ARRAY, PROFESSION_ARRAY[0]));
+
+            const createBannedHost = document.querySelector('[data-create-banned]')
+            createBannedHost.insertAdjacentHTML('afterbegin', createSelectOptions(BANNED_ARRAY, BANNED_ARRAY[0]));
         }
 
         function init() {
             createAccountPerPageSelector();
             getPlayersCount();
             makeTable(pageNumber, accountPerPage);
+            initCreateForm();
         }
     </script>
 </head>
@@ -258,5 +353,30 @@
 
 <span>Pages:</span>
 <div class="pagination"></div>
+
+<h2>Create new account:</h2>
+<div>
+    <label for='create-name'>Name:</label><input id='create-name' type='text' data-create-name/>
+</div>
+<div>
+    <label for='create-title'>Title:</label><input id='create-title' type='text' data-create-title/>
+</div>
+<div>
+    <label for='create-race'>Race:</label><select id='create-race' data-create-race></select>
+</div>
+<div>
+    <label for='create-profession'>Profession:</label><select id='create-profession' data-create-profession></select>
+</div>
+<div>
+    <label for='create-level'>Level:</label><input id='create-level' type='number' min="0" max="100" data-create-level/>
+</div>
+<div>
+    <label for='create-birthday'>Birthday:</label><input id='create-birthday' type='date' data-create-birthday/>
+</div>
+<div>
+    <label for='create-banned'>Banned:</label><select id='create-banned' data-create-banned></select>
+</div>
+<button onclick="createPlayer()">Save</button>
+<button onclick="resetCreateForm()">Reset</button>
 </body>
 </html>
