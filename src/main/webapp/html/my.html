@@ -15,6 +15,13 @@
 
         window.onload = init;
 
+        function init() {
+            createAccountPerPageSelector();
+            getPlayersCount();
+            makeTable(pageNumber, accountPerPage);
+            initCreateForm();
+        }
+
         function makeTable(pageNumber, accountPerPage) {
             $.get(`/rest/players?pageNumber=${pageNumber}&pageSize=${accountPerPage}`, (players) => {
                 const getBirthday = (timestamp) => {
@@ -34,8 +41,16 @@
                             <td class="cell cell_small">${player.level}</td>
                             <td class="cell">${getBirthday(player.birthday)}</td>
                             <td class="cell cell_small" data-player-banned>${player.banned}</td>
-                            <td class="cell cell_auto"><button class="edit-button" value=${player.id}><img src="../img/edit.png" alt="edit"/></button></td>
-                            <td class="cell cell_auto"><button class="remove-button" value=${player.id}><img src="../img/delete.png" alt="delete"/></button></td>
+                            <td class="cell cell_auto">
+                                <button class="edit-button" value=${player.id}>
+                                <img class="edit-img" src="../img/edit.png" alt="edit"/>
+                                </button>
+                            </td>
+                            <td class="cell cell_auto">
+                                <button class="remove-button" value=${player.id}>
+                                <img class="remove-img" src="../img/delete.png" alt="delete"/>
+                                </button>
+                             </td>
                             </tr>`);
 
                 Array.from(tBody.children).forEach((row, index) => {
@@ -52,18 +67,6 @@
 
                 const editButtons = document.querySelectorAll('.edit-button');
                 Array.from(editButtons).forEach((editButton) => editButton.addEventListener('click', editPlayer))
-            });
-        }
-
-        function removePlayer(e) {
-            const playerId = e.currentTarget.value;
-            $.ajax({
-                url: `/rest/players/${playerId}`,
-                type: 'DELETE',
-                success: function () {
-                    getPlayersCount();
-                    makeTable(pageNumber, accountPerPage);
-                }
             });
         }
 
@@ -148,25 +151,6 @@
             host.insertAdjacentHTML('afterbegin', optionsHtml);
         }
 
-        function savePlayer({playerId, values}) {
-            const errorMessage = validateFields(values);
-            if (errorMessage) {
-                window.alert(errorMessage);
-                return;
-            }
-            $.ajax({
-                url: `/rest/players/${playerId}`,
-                type: 'POST',
-                data: JSON.stringify(values),
-                dataType: 'json',
-                contentType: "application/json",
-                success: function () {
-                    getPlayersCount();
-                    makeTable(pageNumber, accountPerPage);
-                }
-            });
-        }
-
         function validateFields(values) {
             let errorMessage = '';
 
@@ -206,6 +190,101 @@
             return errorMessage;
         }
 
+        function getCreateFormFields() {
+            const name = document.getElementById('create-name');
+            const title = document.getElementById('create-title');
+            const race = document.getElementById('create-race');
+            const profession = document.getElementById('create-profession');
+            const level = document.getElementById('create-level');
+            const birthday = document.getElementById('create-birthday');
+            const banned = document.getElementById('create-banned');
+            return {name, title, race, profession, level, birthday, banned};
+        }
+
+        function savePlayer({playerId, values}) {
+            const errorMessage = validateFields(values);
+            if (errorMessage) {
+                window.alert(errorMessage);
+                return;
+            }
+            $.ajax({
+                url: `/rest/players/${playerId}`,
+                type: 'POST',
+                data: JSON.stringify(values),
+                dataType: 'json',
+                contentType: "application/json",
+                success: function () {
+                    getPlayersCount();
+                    makeTable(pageNumber, accountPerPage);
+                }
+            });
+        }
+
+        function resetCreateForm() {
+            const fields = getCreateFormFields();
+            Object.entries(fields).forEach(([key, field]) => {
+                if (['birthday', 'name', 'title', 'level'].includes(key)) {
+                    field.value = '';
+                }
+                if (key === 'race') {
+                    field.value = RACE_ARRAY[0];
+                }
+                if (key === 'profession') {
+                    field.value = PROFESSION_ARRAY[0];
+                }
+                if (key === 'banned') {
+                    field.value = BANNED_ARRAY[0];
+                }
+            })
+        }
+
+        function initCreateForm() {
+            const createRaceHost = document.querySelector('[data-create-race]')
+            createRaceHost.insertAdjacentHTML('afterbegin', createSelectOptions(RACE_ARRAY, RACE_ARRAY[0]));
+
+            const createProfessionHost = document.querySelector('[data-create-profession]')
+            createProfessionHost.insertAdjacentHTML('afterbegin', createSelectOptions(PROFESSION_ARRAY, PROFESSION_ARRAY[0]));
+
+            const createBannedHost = document.querySelector('[data-create-banned]')
+            createBannedHost.insertAdjacentHTML('afterbegin', createSelectOptions(BANNED_ARRAY, BANNED_ARRAY[0]));
+        }
+
+        function createPlayer() {
+            const fields = getCreateFormFields();
+            const values = Object.entries(fields).reduce((res, [key, field]) => {
+                if (key === 'birthday') {
+                    return ({...res, [key]: new Date(field.value).getTime()});
+                }
+                if (key === 'banned') {
+                    return ({...res, [key]: field.value === 'true'});
+                }
+                if (key === 'level') {
+                    return ({...res, [key]: field.value ? !isNaN(field.value) && parseInt(field.value) : ''});
+                }
+                return ({...res, [key]: field.value});
+
+            }, {})
+
+            const errorMessage = validateFields(values);
+            if (errorMessage) {
+                window.alert(errorMessage);
+                return;
+            }
+
+            $.ajax({
+                url: '/rest/players',
+                type: 'POST',
+                data: JSON.stringify(values),
+                dataType: 'json',
+                contentType: "application/json",
+                success: function () {
+                    resetCreateForm();
+                    getPlayersCount();
+                    makeTable(pageNumber, accountPerPage);
+                }
+            });
+        }
+
         function editPlayer(e) {
             const playerId = e.currentTarget.value;
             const currRow = document.querySelector(`.row[data-player-id='${playerId}']`)
@@ -242,97 +321,28 @@
             currBanned.childNodes[0].replaceWith(createSelect(BANNED_ARRAY, currBanned.innerHTML));
         }
 
-        function getCreateFormFields() {
-            const name = document.getElementById('create-name');
-            const title = document.getElementById('create-title');
-            const race = document.getElementById('create-race');
-            const profession = document.getElementById('create-profession');
-            const level = document.getElementById('create-level');
-            const birthday = document.getElementById('create-birthday');
-            const banned = document.getElementById('create-banned');
-            return {name, title, race, profession, level, birthday, banned};
-        }
-
-        function createPlayer() {
-            const fields = getCreateFormFields();
-            const values = Object.entries(fields).reduce((res, [key, field]) => {
-                if (key === 'birthday') {
-                    return ({...res, [key]: new Date(field.value).getTime()});
-                }
-                if (key === 'banned'){
-                    return ({...res, [key]: field.value === 'true'});
-                }
-                if (key === 'level'){
-                    return ({...res, [key]: field.value ? !isNaN(field.value) && parseInt(field.value) : ''});
-                }
-                return ({...res, [key]: field.value});
-
-            }, {})
-
-            const errorMessage = validateFields(values);
-            if (errorMessage) {
-                window.alert(errorMessage);
-                return;
-            }
-
+        function removePlayer(e) {
+            const playerId = e.currentTarget.value;
             $.ajax({
-                url: '/rest/players',
-                type: 'POST',
-                data: JSON.stringify(values),
-                dataType: 'json',
-                contentType: "application/json",
+                url: `/rest/players/${playerId}`,
+                type: 'DELETE',
                 success: function () {
-                    resetCreateForm();
                     getPlayersCount();
                     makeTable(pageNumber, accountPerPage);
                 }
             });
         }
 
-        function resetCreateForm() {
-            const fields = getCreateFormFields();
-            Object.entries(fields).forEach(([key, field]) => {
-                if (['birthday', 'name', 'title', 'level'].includes(key)){
-                    field.value = '';
-                }
-                if (key === 'race') {
-                    field.value = RACE_ARRAY[0];
-                }
-                if (key === 'profession'){
-                    field.value = PROFESSION_ARRAY[0];
-                }
-                if (key === 'banned') {
-                    field.value = BANNED_ARRAY[0];
-                }
-            })
-        }
-
-        function initCreateForm(){
-            const createRaceHost = document.querySelector('[data-create-race]')
-            createRaceHost.insertAdjacentHTML('afterbegin', createSelectOptions(RACE_ARRAY, RACE_ARRAY[0]));
-
-            const createProfessionHost = document.querySelector('[data-create-profession]')
-            createProfessionHost.insertAdjacentHTML('afterbegin', createSelectOptions(PROFESSION_ARRAY, PROFESSION_ARRAY[0]));
-
-            const createBannedHost = document.querySelector('[data-create-banned]')
-            createBannedHost.insertAdjacentHTML('afterbegin', createSelectOptions(BANNED_ARRAY, BANNED_ARRAY[0]));
-        }
-
-        function init() {
-            createAccountPerPageSelector();
-            getPlayersCount();
-            makeTable(pageNumber, accountPerPage);
-            initCreateForm();
-        }
     </script>
 </head>
 <body>
 <h1>RPG admin panel</h1>
 <h2>Accounts list:</h2>
 
-<label for="accounts-per-page">Count per page:</label>
-<select class="accounts-per-page" id="accounts-per-page"></select>
-<br>
+<div class="accounts-per-page-wrapper">
+    <label for="accounts-per-page">Count per page:</label>
+    <select class="accounts-per-page" id="accounts-per-page"></select>
+</div>
 
 <table class="players-table">
     <tbody class="players-table__body">
@@ -351,32 +361,37 @@
     </tbody>
 </table>
 
-<span>Pages:</span>
-<div class="pagination"></div>
+<div class="pagination-wrapper">
+    <span>Pages:</span>
+    <span class="pagination"></span>
+</div>
 
-<h2>Create new account:</h2>
-<div>
-    <label for='create-name'>Name:</label><input id='create-name' type='text' data-create-name/>
+<div class="create-form">
+    <h2>Create new account</h2>
+    <div class="create-field">
+        <label for='create-name'>Name:</label><input id='create-name' type='text' data-create-name/>
+    </div>
+    <div class="create-field">
+        <label for='create-title'>Title:</label><input id='create-title' type='text' data-create-title/>
+    </div>
+    <div class="create-field">
+        <label for='create-race'>Race:</label><select id='create-race' data-create-race></select>
+    </div>
+    <div class="create-field">
+        <label for='create-profession'>Profession:</label><select id='create-profession'
+                                                                  data-create-profession></select>
+    </div>
+    <div class="create-field">
+        <label for='create-level'>Level:</label><input id='create-level' type='number' min="0" max="100"
+                                                       data-create-level/>
+    </div>
+    <div class="create-field">
+        <label for='create-birthday'>Birthday:</label><input id='create-birthday' type='date' data-create-birthday/>
+    </div>
+    <div class="create-field">
+        <label for='create-banned'>Banned:</label><select id='create-banned' data-create-banned></select>
+    </div>
+    <button class="save-button" onclick="createPlayer()">Save</button>
 </div>
-<div>
-    <label for='create-title'>Title:</label><input id='create-title' type='text' data-create-title/>
-</div>
-<div>
-    <label for='create-race'>Race:</label><select id='create-race' data-create-race></select>
-</div>
-<div>
-    <label for='create-profession'>Profession:</label><select id='create-profession' data-create-profession></select>
-</div>
-<div>
-    <label for='create-level'>Level:</label><input id='create-level' type='number' min="0" max="100" data-create-level/>
-</div>
-<div>
-    <label for='create-birthday'>Birthday:</label><input id='create-birthday' type='date' data-create-birthday/>
-</div>
-<div>
-    <label for='create-banned'>Banned:</label><select id='create-banned' data-create-banned></select>
-</div>
-<button onclick="createPlayer()">Save</button>
-<button onclick="resetCreateForm()">Reset</button>
 </body>
 </html>
