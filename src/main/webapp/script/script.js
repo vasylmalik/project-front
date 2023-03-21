@@ -80,10 +80,13 @@ $(document).ready(function () {
         deleteAccount(id);
     });
 
+    tableBody.on('click', '.btn-edit', function () {
+        $(this).find('img').attr('src','img/save.png');
+    });
+
     pageNumber.on('click', 'button', function () {
         let pageSize = dropDown.val();
         pageNum = $(this).val() - 1;
         renderTable(pageSize, pageNum);
     });
-
 });
