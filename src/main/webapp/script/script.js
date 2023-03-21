@@ -19,7 +19,7 @@ $(document).ready(function () {
                     <td>${new Date(member.birthday).toLocaleDateString()}</td>
                     <td>${member.banned}</td>
                     <td><button class="btn-edit"><img src="img/edit.png" alt="Edit"></button></td>
-                    <td><button class="btn-delete" data-id="${member.id}"><img src="img/delete.png" alt="Delete"></button></td>
+                    <td><button class="btn-delete" data-id="${member.id}"><img src="img/delete.png" id="img-delete" alt="Delete"></button></td>
                     </tr>`;
                 table.append(row);
             });
@@ -81,7 +81,8 @@ $(document).ready(function () {
     });
 
     tableBody.on('click', '.btn-edit', function () {
-        $(this).find('img').attr('src','img/save.png');
+        $(this).find('img').attr('src', 'img/save.png');
+        $(this).closest('tr').find('.btn-delete').toggle();
     });
 
     pageNumber.on('click', 'button', function () {
