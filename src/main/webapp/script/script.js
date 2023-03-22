@@ -10,15 +10,15 @@ $(document).ready(function () {
             tableBody.empty();
             $.each(data, function (i, member) {
                 const row = `<tr>
-                    <td>${member.id}</td>
-                    <td>${member.name}</td>
-                    <td>${member.title}</td>
-                    <td>${member.race}</td>
-                    <td>${member.profession}</td>
+                    <td data-id="${member.id}">${member.id}</td>
+                    <td><span class="name">${member.name}</span></td>
+                    <td><span class="title">${member.title}</span>></td>
+                    <td><span class="race">${member.race}</span>></td>
+                    <td><span class="profession">${member.profession}</span></td>
                     <td>${member.level}</td>
                     <td>${new Date(member.birthday).toLocaleDateString()}</td>
-                    <td>${member.banned}</td>
-                    <td><button class="btn-edit"><img src="img/edit.png" alt="Edit"></button></td>
+                    <td><span class="banned">${member.banned}</span></td>
+                    <td><button class="btn-edit" data-id="${member.id}"><img src="img/edit.png" alt="Edit"></button></td>
                     <td><button class="btn-delete" data-id="${member.id}"><img src="img/delete.png" id="img-delete" alt="Delete"></button></td>
                     </tr>`;
                 table.append(row);
@@ -70,7 +70,13 @@ $(document).ready(function () {
                 console.log(`User with id: ${id} deleted successfully`);
             },
             error: function (error) {
-                alert(`Error deleting user: ${error}`);
+                if (error.status === 404) {
+                    alert(`Error deleting user: ${error}. Player is not found.`);
+                } else if (error.status === 400) {
+                    alert(`Error deleting user: ${error}. Invalid ID.`);
+                } else {
+                    alert(`Error deleting user: ${error}`);
+                }
             }
         });
     }
@@ -83,6 +89,54 @@ $(document).ready(function () {
     tableBody.on('click', '.btn-edit', function () {
         $(this).find('img').attr('src', 'img/save.png');
         $(this).closest('tr').find('.btn-delete').toggle();
+
+        const row = $(this).closest('tr');
+        const id = row.attr('data-id');
+        const name = row.find('.name').text();
+        const title = row.find('.title').text();
+        const race = row.find('.race').text();
+        const profession = row.find('.profession').text();
+        const banned = row.find('.banned').text() === 'true';
+
+        let val_name = row.find('.name').html(`<input type="text" name="name" value="${name}">`);
+        let val_title = row.find('.title').html(`<input type="text" name="title" value="${title}">`);
+        let val_race = row.find('.race').html(`<input type="text" name="race" value="${race}">`);
+        let val_profession = row.find('.profession').html(`<input type="text" name="profession" value="${profession}">`);
+        let val_banned = row.find('.banned').html(`
+        <select name="banned">
+            <option value="true" ${banned ? 'selected' : ''}>true</option>
+            <option value="false" ${!banned ? 'selected' : ''}>false</option>
+        </select>
+    `);
+
+        $('.btn-edit').off('click').on('click', function () {
+            var id = $(this).data('id');
+            $.ajax({
+                url: `/rest/players/${id}`,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    name: val_name.find('input').val(),
+                    title: val_title.find('input').val(),
+                    race: val_race.find('input').val(),
+                    profession: val_profession.find('input').val(),
+                    banned: val_banned.find('select').val() === 'true'
+                }),
+                success: function () {
+                    renderTable(dropDown.val(), pageNum);
+                    renderPaginationButtons();
+                },
+                error: function (error) {
+                    if (error.status === 404) {
+                        alert(`Error editing user: ${error}. Player is not found in the database.`);
+                    } else if (error.status === 400) {
+                        alert(`Error deleting user: ${error}. Invalid ID.`);
+                    } else {
+                        alert(`Error deleting user: ${error}`);
+                    }
+                }
+            });
+        });
     });
 
     pageNumber.on('click', 'button', function () {

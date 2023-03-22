@@ -41,5 +41,55 @@
     <caption>Pages:</caption>
     <div id='page-number'></div>
 </div>
+<div>
+    <h1>Create new account:</h1>
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" minlength="1" maxlength="12" required>
+</div>
+<div>
+    <label for="title">Title:</label>
+    <input type="text" id="title" name="title" minlength="1" maxlength="30" required>
+</div>
+<div>
+    <label for="race">Race:</label>
+    <select id="race" name="race" required>
+        <option value="HUMAN">HUMAN</option>
+        <option value="ELF">ELF</option>
+        <option value="DWARF">DWARF</option>
+        <option value="GIANT">GIANT</option>
+        <option value="ORC">ORC</option>
+        <option value="TROLL">TROLL</option>
+        <option value="HOBBIT">HOBBIT</option>>
+    </select>
+</div>
+<div>
+    <label for="profession">Profession:</label>
+    <select id="profession" name="profession" required>
+        <option value="WARRIOR">WARRIOR</option>
+        <option value="ROGUE">ROGUE</option>
+        <option value="SORCERER">SORCERER</option>
+        <option value="CLERIC">CLERIC</option>
+        <option value="PALADIN">PALADIN</option>
+        <option value="NAZGUL">NAZGUL</option>
+        <option value="WARLOCK">WARLOCK</option>
+        <option value="DRUID">DRUID</option>
+    </select>
+</div>
+<div>
+    <label for="level">Level:</label>
+    <input type="number" id="level" name="level" min="0" max="100" required>
+</div>
+<div>
+    <label for="birthday">Birthday:</label>
+    <input type="date" id="birthday" name="birthday" required>
+</div>
+<div>
+    <label for="banned">Banned:</label>
+    <select id="banned" name="banned">
+        <option value="false">false</option>
+        <option value="true">true</option>
+    </select>
+</div>
+<button id="save-button">Save</button>
 </body>
 </html>
