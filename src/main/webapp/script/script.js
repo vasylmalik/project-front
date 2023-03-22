@@ -91,7 +91,6 @@ $(document).ready(function () {
         $(this).closest('tr').find('.btn-delete').toggle();
 
         const row = $(this).closest('tr');
-        const id = row.attr('data-id');
         const name = row.find('.name').text();
         const title = row.find('.title').text();
         const race = row.find('.race').text();
