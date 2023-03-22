@@ -3,9 +3,395 @@
     <title>RPG</title>
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <link href="/css/my.css" rel="stylesheet">
+    <script>
+        let accountsCount = null;
+        let accountPerPage = 3;
+        let pageNumber = 0;
+        let pages = null;
+
+        const RACE_ARRAY = ['HUMAN', 'DWARF', 'ELF', 'GIANT', 'ORC', 'TROLL', 'HOBBIT'];
+        const PROFESSION_ARRAY = ['WARRIOR', 'ROGUE', 'SORCERER', 'CLERIC', 'PALADIN', 'NAZGUL', 'WARLOCK', 'DRUID'];
+        const BANNED_ARRAY = ['true', 'false'];
+
+        window.onload = init;
+
+        function init() {
+            createAccountPerPageSelector();
+            getPlayersCount();
+            makeTable(pageNumber, accountPerPage);
+            initCreateForm();
+        }
+
+        function makeTable(pageNumber, accountPerPage) {
+            $.get(`/rest/players?pageNumber=${pageNumber}&pageSize=${accountPerPage}`, (players) => {
+                const getBirthday = (timestamp) => {
+                    const date = new Date(timestamp);
+                    return `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`;
+                }
+
+                const tBody = document.querySelector('.players-table__body');
+                let newRowsHtml = '';
+                players.forEach((player) => newRowsHtml +=
+                    `<tr class="row" data-player-id=${player.id}>
+                            <td class="cell cell_small">${player.id}</td>
+                            <td class="cell" data-player-name>${player.name}</td>
+                            <td class="cell" data-player-title>${player.title}</td>
+                            <td class="cell" data-player-race>${player.race}</td>
+                            <td class="cell" data-player-profession>${player.profession}</td>
+                            <td class="cell cell_small">${player.level}</td>
+                            <td class="cell">${getBirthday(player.birthday)}</td>
+                            <td class="cell cell_small" data-player-banned>${player.banned}</td>
+                            <td class="cell cell_auto">
+                                <button class="edit-button" value=${player.id}>
+                                <img class="edit-img" src="../img/edit.png" alt="edit"/>
+                                </button>
+                            </td>
+                            <td class="cell cell_auto">
+                                <button class="remove-button" value=${player.id}>
+                                <img class="remove-img" src="../img/delete.png" alt="delete"/>
+                                </button>
+                             </td>
+                            </tr>`);
+
+                Array.from(tBody.children).forEach((row, index) => {
+                    if (index == 0) {
+                        return;
+                    }
+                    row.remove();
+                })
+
+                tBody.insertAdjacentHTML('beforeend', newRowsHtml);
+
+                const removeButtons = document.querySelectorAll('.remove-button');
+                Array.from(removeButtons).forEach((removeButton) => removeButton.addEventListener('click', removePlayer))
+
+                const editButtons = document.querySelectorAll('.edit-button');
+                Array.from(editButtons).forEach((editButton) => editButton.addEventListener('click', editPlayer))
+            });
+        }
+
+        function updatePagination() {
+            pages = accountsCount ? Math.ceil(accountsCount / accountPerPage) : 0;
+            const pagination = document.querySelector('.pagination');
+            const paginationChildrenCount = pagination.children.length;
+
+            let paginationButtonsHtml = '';
+            for (let i = 1; i <= pages; i++) {
+                paginationButtonsHtml += `<button class="pagination__page" value=${i - 1}>${i}</button>`
+            }
+
+            if (paginationChildrenCount !== 0) {
+                Array.from(pagination.children).forEach((node) => node.remove());
+            }
+
+            pagination.insertAdjacentHTML('beforeend', paginationButtonsHtml);
+            Array.from(pagination.children).forEach((button) => button.addEventListener('click', onPageChange));
+
+            changeActivePageView(pageNumber);
+        }
+
+        function changeActivePageView(nextActivePageNumber = 0) {
+            const pagination = document.querySelector('.pagination');
+            const nextActivePage = Array.from(pagination.children)[nextActivePageNumber];
+            const currActivePage = document.querySelector('.pagination__page_active');
+            currActivePage && currActivePage.classList.remove('pagination__page_active');
+            nextActivePage && nextActivePage.classList.add('pagination__page_active');
+            pageNumber = nextActivePageNumber;
+        }
+
+        function getPlayersCount() {
+            $.get('/rest/players/count', (count) => {
+                accountsCount = count;
+                updatePagination();
+            });
+        }
+
+        function onAccountPerPageChange(e) {
+            accountPerPage = e.currentTarget.value;
+            makeTable(pageNumber, accountPerPage);
+            updatePagination();
+        }
+
+        function onPageChange(e) {
+            const pageNumber = e.currentTarget.value;
+            makeTable(pageNumber, accountPerPage);
+            changeActivePageView(pageNumber);
+        }
+
+        function createSelectOptions(optionsArray, defaultValue) {
+            let optionsHtml = '';
+            optionsArray.forEach(option => optionsHtml += `<option ${defaultValue === option && 'selected'} value=${option}>${option}</option>`);
+            return optionsHtml;
+        }
+
+        function createSelect(optionsArray, defaultValue) {
+            const optionsHtml = createSelectOptions(optionsArray, defaultValue);
+            const select = document.createElement('select');
+            select.insertAdjacentHTML('afterbegin', optionsHtml);
+            select.setAttribute('data-value', defaultValue);
+            select.addEventListener('change', (e) => select.setAttribute('data-value', e.currentTarget.value));
+            return select;
+        }
+
+        function createTextInput(value) {
+            const textInput = document.createElement('input');
+            textInput.setAttribute('type', 'text');
+            textInput.setAttribute('value', value);
+            textInput.setAttribute('data-value', value);
+            textInput.addEventListener('input', (e) => {
+                textInput.setAttribute('data-value', `${e.currentTarget.value}`);
+            });
+            return textInput;
+        }
+
+        function createAccountPerPageSelector() {
+            const host = document.querySelector('.accounts-per-page');
+            const optionsHtml = createSelectOptions([3, 5, 10, 20]);
+            host.addEventListener('change', onAccountPerPageChange);
+            host.insertAdjacentHTML('afterbegin', optionsHtml);
+        }
+
+        function validateFields(values) {
+            let errorMessage = '';
+
+            Object.entries(values).find(([key, value]) => {
+                if (typeof value === 'string') {
+                    if (!value) {
+                        errorMessage = `${key} cannot be empty`;
+                        return true;
+                    }
+                    if (key === 'name' && value.length >= 12) {
+                        errorMessage = 'name value length is greater than 12 chars';
+                        return true;
+                    }
+                    if (key === 'title' && value.length >= 30) {
+                        errorMessage = 'title value length is greater than 30 chars';
+                        return true;
+                    }
+                } else if (typeof value === 'boolean') {
+                    return String(value) === '';
+                } else if (typeof value === 'number') {
+                    if (key === 'level' && (value < 0 || value > 100)) {
+                        errorMessage = 'level value is out of range 0-100';
+                        return true;
+                    }
+                    if (key === 'birthday' && value < 0) {
+                        errorMessage = 'birthday value cannot be negative';
+                        return true;
+
+                    }
+                    if (key === 'birthday' && isNaN(value)) {
+                        errorMessage = 'birthday  value is not correct';
+                        return true;
+                    }
+                }
+            });
+
+            return errorMessage;
+        }
+
+        function getCreateFormFields() {
+            const name = document.getElementById('create-name');
+            const title = document.getElementById('create-title');
+            const race = document.getElementById('create-race');
+            const profession = document.getElementById('create-profession');
+            const level = document.getElementById('create-level');
+            const birthday = document.getElementById('create-birthday');
+            const banned = document.getElementById('create-banned');
+            return {name, title, race, profession, level, birthday, banned};
+        }
+
+        function savePlayer({playerId, values}) {
+            const errorMessage = validateFields(values);
+            if (errorMessage) {
+                window.alert(errorMessage);
+                return;
+            }
+            $.ajax({
+                url: `/rest/players/${playerId}`,
+                type: 'POST',
+                data: JSON.stringify(values),
+                dataType: 'json',
+                contentType: "application/json",
+                success: function () {
+                    getPlayersCount();
+                    makeTable(pageNumber, accountPerPage);
+                }
+            });
+        }
+
+        function resetCreateForm() {
+            const fields = getCreateFormFields();
+            Object.entries(fields).forEach(([key, field]) => {
+                if (['birthday', 'name', 'title', 'level'].includes(key)) {
+                    field.value = '';
+                }
+                if (key === 'race') {
+                    field.value = RACE_ARRAY[0];
+                }
+                if (key === 'profession') {
+                    field.value = PROFESSION_ARRAY[0];
+                }
+                if (key === 'banned') {
+                    field.value = BANNED_ARRAY[0];
+                }
+            })
+        }
+
+        function initCreateForm() {
+            const createRaceHost = document.querySelector('[data-create-race]')
+            createRaceHost.insertAdjacentHTML('afterbegin', createSelectOptions(RACE_ARRAY, RACE_ARRAY[0]));
+
+            const createProfessionHost = document.querySelector('[data-create-profession]')
+            createProfessionHost.insertAdjacentHTML('afterbegin', createSelectOptions(PROFESSION_ARRAY, PROFESSION_ARRAY[0]));
+
+            const createBannedHost = document.querySelector('[data-create-banned]')
+            createBannedHost.insertAdjacentHTML('afterbegin', createSelectOptions(BANNED_ARRAY, BANNED_ARRAY[0]));
+        }
+
+        function createPlayer() {
+            const fields = getCreateFormFields();
+            const values = Object.entries(fields).reduce((res, [key, field]) => {
+                if (key === 'birthday') {
+                    return ({...res, [key]: new Date(field.value).getTime()});
+                }
+                if (key === 'banned') {
+                    return ({...res, [key]: field.value === 'true'});
+                }
+                if (key === 'level') {
+                    return ({...res, [key]: field.value ? !isNaN(field.value) && parseInt(field.value) : ''});
+                }
+                return ({...res, [key]: field.value});
+
+            }, {})
+
+            const errorMessage = validateFields(values);
+            if (errorMessage) {
+                window.alert(errorMessage);
+                return;
+            }
+
+            $.ajax({
+                url: '/rest/players',
+                type: 'POST',
+                data: JSON.stringify(values),
+                dataType: 'json',
+                contentType: "application/json",
+                success: function () {
+                    resetCreateForm();
+                    getPlayersCount();
+                    makeTable(pageNumber, accountPerPage);
+                }
+            });
+        }
+
+        function editPlayer(e) {
+            const playerId = e.currentTarget.value;
+            const currRow = document.querySelector(`.row[data-player-id='${playerId}']`)
+            const currRemoveButton = currRow.querySelector('.remove-button');
+            const currEditImg = currRow.querySelector('.edit-button img');
+            const currName = currRow.querySelector('[data-player-name]');
+            const currTitle = currRow.querySelector('[data-player-title]');
+            const currRace = currRow.querySelector('[data-player-race]');
+            const currProfession = currRow.querySelector('[data-player-profession]');
+            const currBanned = currRow.querySelector('[data-player-banned]');
+
+            if (currEditImg.dataset.editable) {
+                return;
+            }
+            currEditImg.src = "../img/save.png";
+            currEditImg.dataset.editable = true;
+            currEditImg.addEventListener('click', () => {
+                savePlayer({
+                    playerId, values: {
+                        name: currName.childNodes[0].dataset.value,
+                        title: currTitle.childNodes[0].dataset.value,
+                        race: currRace.childNodes[0].dataset.value,
+                        profession: currProfession.childNodes[0].dataset.value,
+                        banned: currBanned.childNodes[0].dataset.value === 'true',
+                    }
+                })
+            });
+            currRemoveButton.classList.add('hidden');
+
+            currName.childNodes[0].replaceWith(createTextInput(currName.innerHTML));
+            currTitle.childNodes[0].replaceWith(createTextInput(currTitle.innerHTML));
+            currRace.childNodes[0].replaceWith(createSelect(RACE_ARRAY, currRace.innerHTML));
+            currProfession.childNodes[0].replaceWith(createSelect(PROFESSION_ARRAY, currProfession.innerHTML));
+            currBanned.childNodes[0].replaceWith(createSelect(BANNED_ARRAY, currBanned.innerHTML));
+        }
+
+        function removePlayer(e) {
+            const playerId = e.currentTarget.value;
+            $.ajax({
+                url: `/rest/players/${playerId}`,
+                type: 'DELETE',
+                success: function () {
+                    getPlayersCount();
+                    makeTable(pageNumber, accountPerPage);
+                }
+            });
+        }
+
+    </script>
 </head>
 <body>
 <h1>RPG admin panel</h1>
+<h2>Accounts list:</h2>
 
+<div class="accounts-per-page-wrapper">
+    <label for="accounts-per-page">Count per page:</label>
+    <select class="accounts-per-page" id="accounts-per-page"></select>
+</div>
+
+<table class="players-table">
+    <tbody class="players-table__body">
+    <tr class="players-table__row players-table__row_header">
+        <th class="header-cell">#</th>
+        <th class="header-cell">Name</th>
+        <th class="header-cell">Title</th>
+        <th class="header-cell">Race</th>
+        <th class="header-cell">Profession</th>
+        <th class="header-cell">Level</th>
+        <th class="header-cell">Birthday</th>
+        <th class="header-cell">Banned</th>
+        <th class="header-cell">Edit</th>
+        <th class="header-cell">Delete</th>
+    </tr>
+    </tbody>
+</table>
+
+<div class="pagination-wrapper">
+    <span>Pages:</span>
+    <span class="pagination"></span>
+</div>
+
+<div class="create-form">
+    <h2>Create new account</h2>
+    <div class="create-field">
+        <label for='create-name'>Name:</label><input id='create-name' type='text' data-create-name/>
+    </div>
+    <div class="create-field">
+        <label for='create-title'>Title:</label><input id='create-title' type='text' data-create-title/>
+    </div>
+    <div class="create-field">
+        <label for='create-race'>Race:</label><select id='create-race' data-create-race></select>
+    </div>
+    <div class="create-field">
+        <label for='create-profession'>Profession:</label><select id='create-profession'
+                                                                  data-create-profession></select>
+    </div>
+    <div class="create-field">
+        <label for='create-level'>Level:</label><input id='create-level' type='number' min="0" max="100"
+                                                       data-create-level/>
+    </div>
+    <div class="create-field">
+        <label for='create-birthday'>Birthday:</label><input id='create-birthday' type='date' data-create-birthday/>
+    </div>
+    <div class="create-field">
+        <label for='create-banned'>Banned:</label><select id='create-banned' data-create-banned></select>
+    </div>
+    <button class="save-button" onclick="createPlayer()">Save</button>
+</div>
 </body>
 </html>
