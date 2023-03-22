@@ -15,8 +15,8 @@ $(document).ready(function () {
                     <td><span class="title">${member.title}</span>></td>
                     <td><span class="race">${member.race}</span>></td>
                     <td><span class="profession">${member.profession}</span></td>
-                    <td>${member.level}</td>
-                    <td>${new Date(member.birthday).toLocaleDateString()}</td>
+                    <td><span class="level">${member.level}</span></td>
+                    <td><span class="birthday">${new Date(member.birthday).toLocaleDateString()}</span></td>
                     <td><span class="banned">${member.banned}</span></td>
                     <td><button class="btn-edit" data-id="${member.id}"><img src="img/edit.png" alt="Edit"></button></td>
                     <td><button class="btn-delete" data-id="${member.id}"><img src="img/delete.png" id="img-delete" alt="Delete"></button></td>
@@ -130,9 +130,9 @@ $(document).ready(function () {
                     if (error.status === 404) {
                         alert(`Error editing user: ${error}. Player is not found in the database.`);
                     } else if (error.status === 400) {
-                        alert(`Error deleting user: ${error}. Invalid ID.`);
+                        alert(`Error editing user: ${error}. Invalid ID.`);
                     } else {
-                        alert(`Error deleting user: ${error}`);
+                        alert(`Error editing user: ${error}`);
                     }
                 }
             });
