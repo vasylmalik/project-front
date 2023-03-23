@@ -61,15 +61,12 @@ $(document).ready(function () {
     function deleteAccount(id) {
         const btn = $(this);
         $.ajax({
-            url: `/rest/players/${id}`,
-            type: 'DELETE',
-            success: function () {
+            url: `/rest/players/${id}`, type: 'DELETE', success: function () {
                 btn.closest('tr').remove();
                 renderTable(dropDown.val(), pageNum);
                 renderPaginationButtons();
                 console.log(`User with id: ${id} deleted successfully`);
-            },
-            error: function (error) {
+            }, error: function (error) {
                 if (error.status === 404) {
                     alert(`Error deleting user: ${error}. Player is not found.`);
                 } else if (error.status === 400) {
@@ -97,11 +94,11 @@ $(document).ready(function () {
         const profession = row.find('.profession').text();
         const banned = row.find('.banned').text() === 'true';
 
-        let val_name = row.find('.name').html(`<input type="text" name="name" value="${name}">`);
-        let val_title = row.find('.title').html(`<input type="text" name="title" value="${title}">`);
-        let val_race = row.find('.race').html(`<input type="text" name="race" value="${race}">`);
-        let val_profession = row.find('.profession').html(`<input type="text" name="profession" value="${profession}">`);
-        let val_banned = row.find('.banned').html(`
+        let new_name = row.find('.name').html(`<input type="text" name="name" value="${name}">`);
+        let new_title = row.find('.title').html(`<input type="text" name="title" value="${title}">`);
+        let new_race = row.find('.race').html(`<input type="text" name="race" value="${race}">`);
+        let new_profession = row.find('.profession').html(`<input type="text" name="profession" value="${profession}">`);
+        let new_banned = row.find('.banned').html(`
         <select name="banned">
             <option value="true" ${banned ? 'selected' : ''}>true</option>
             <option value="false" ${!banned ? 'selected' : ''}>false</option>
@@ -113,19 +110,19 @@ $(document).ready(function () {
             $.ajax({
                 url: `/rest/players/${id}`,
                 type: 'POST',
-                contentType: 'application/json',
+                dataType: 'json',
+                contentType: 'application/json;charset=UTF-8',
+                async: false,
                 data: JSON.stringify({
-                    name: val_name.find('input').val(),
-                    title: val_title.find('input').val(),
-                    race: val_race.find('input').val(),
-                    profession: val_profession.find('input').val(),
-                    banned: val_banned.find('select').val() === 'true'
-                }),
-                success: function () {
+                    name: new_name.find('input').val(),
+                    title: new_title.find('input').val(),
+                    race: new_race.find('input').val(),
+                    profession: new_profession.find('input').val(),
+                    banned: new_banned.find('select').val() === 'true'
+                }), success: function () {
                     renderTable(dropDown.val(), pageNum);
                     renderPaginationButtons();
-                },
-                error: function (error) {
+                }, error: function (error) {
                     if (error.status === 404) {
                         alert(`Error editing user: ${error}. Player is not found in the database.`);
                     } else if (error.status === 400) {
@@ -138,6 +135,48 @@ $(document).ready(function () {
         });
     });
 
+    $('.save-btn').on('click', function () {
+        let name = $('#name-new').val();
+        let title = $('#title-new').val();
+        let race = $('#race-new').val();
+        let profession = $('#profession-new').val();
+        let level = $('#level-new').val();
+        let birthday = $('#birthday-new').val();
+        let banned = $('#banned-new').val();
+
+        $.ajax({
+            url: '/rest/players',
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json;charset=UTF-8',
+            async: false,
+            data: JSON.stringify({
+                name: name,
+                title: title,
+                race: race,
+                profession: profession,
+                level: level,
+                birthday: new Date(birthday).getTime(),
+                banned: banned
+            }), success: function () {
+                $('#name-new').val('');
+                $('#title-new').val('');
+                $('#race-new').val('');
+                $('#profession-new').val('');
+                $('#level-new').val('');
+                $('#birthday-new').val('');
+                $('#banned-new').val('');
+                renderTable(dropDown.val(), pageNum);
+                renderPaginationButtons();
+            }, error: function (error) {
+                if (error.status === 400) {
+                    alert(error.message);
+                } else {
+                    alert(`Error saving user: ${error}.`);
+                }
+            }
+        });
+    });
     pageNumber.on('click', 'button', function () {
         let pageSize = dropDown.val();
         pageNum = $(this).val() - 1;
