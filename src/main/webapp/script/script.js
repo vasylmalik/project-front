@@ -49,15 +49,6 @@ $(document).ready(function () {
         });
     }
 
-    renderTable(5, 0);
-    renderPaginationButtons();
-
-    dropDown.click(() => {
-        let pageSize = dropDown.val();
-        renderTable(pageSize, 0);
-        renderPaginationButtons();
-    });
-
     function deleteAccount(id) {
         const btn = $(this);
         $.ajax({
@@ -77,6 +68,15 @@ $(document).ready(function () {
             }
         });
     }
+
+    renderTable(5, 0);
+    renderPaginationButtons();
+
+    dropDown.click(() => {
+        let pageSize = dropDown.val();
+        renderTable(pageSize, 0);
+        renderPaginationButtons();
+    });
 
     tableBody.on('click', '.btn-delete', function () {
         const id = $(this).data('id');
@@ -177,6 +177,7 @@ $(document).ready(function () {
             }
         });
     });
+
     pageNumber.on('click', 'button', function () {
         let pageSize = dropDown.val();
         pageNum = $(this).val() - 1;
