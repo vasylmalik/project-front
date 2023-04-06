@@ -1,0 +1,97 @@
+.html_body {
+    margin-left: 2%;
+    background: #f5f5dc;
+}
+
+th, td {
+    border: 1px solid black;
+    padding: 3px;
+}
+
+
+.click_active {
+    color: red;
+}
+
+#table_players {
+    width: 96%;
+    margin-bottom: 20px;
+    border: 1px solid #dddddd;
+    border-collapse: collapse;
+}
+
+#table_players th {
+    font-weight: bold;
+    padding: 5px;
+    background: #deb887;
+    border: 2px solid #8b0000;
+}
+
+#table_players td {
+    border: 2px solid #555555;
+    padding: 5px;
+}
+
+#table_players tbody tr:nth-child(odd) {
+    background: #a9a9a9;
+}
+
+#table_players tr:nth-child(even) {
+    background: #dddddd;
+}
+
+/*label*/
+#create_block .label_create {
+    display: inline-block;
+    user-select: none;
+    background-color: #555;
+    color: white;
+    border: 1px solid black;
+    padding: 3px;
+    font-size: 16px;
+    cursor: pointer;
+    position: relative;
+    height: auto;
+    top: 1px;
+    width: calc(10% - 1px);
+    box-sizing: border-box;
+}
+
+#create-button {
+    background-color: #555;
+    color: white;
+    opacity: 0.8;
+    width: 80px;
+    height: 40px;
+    border: 3px solid black;
+    padding: 3px;
+    font-size: 20px;
+    font-style: italic;
+}
+
+#create_block{
+    background: #f5f5dc;
+}
+
+
+#data_win #create_block .label_create {
+    display: inline-block;
+    user-select: none;
+    background-color: #555;
+    color: white;
+    border: 1px solid black;
+    padding: 3px;
+    font-size: 16px;
+    cursor: pointer;
+    position: relative;
+    height: auto;
+    top: 1px;
+    width: calc(20% - 1px);
+    box-sizing: border-box;
+}
+
+
+
+
+
+
